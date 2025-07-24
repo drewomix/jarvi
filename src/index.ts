@@ -1,28 +1,16 @@
 import fs from "node:fs";
-import path from "node:path";
 
-import { AppServer, type AppSession, StreamType } from "@mentra/sdk";
+import { AppServer, type AppSession, StreamType, ViewType } from "@mentra/sdk";
 import Groq from "groq-sdk";
-import { WaveFile } from "wavefile";
-
-export function concatInt16Arrays(arrays: Int16Array[]): Int16Array {
-	const totalLength = arrays.reduce((sum, arr) => sum + arr.length, 0);
-	const result = new Int16Array(totalLength);
-	let offset = 0;
-	for (const arr of arrays) {
-		result.set(arr, offset);
-		offset += arr.length;
-	}
-	return result;
-}
+import {
+	concatInt16Arrays,
+	deleteFileSafe,
+	pcmInt16ToWavBuffer,
+	writeTempWavFile,
+} from "./utils/audio";
+import { cleanTranscription } from "./utils/chat";
 
 const groq = new Groq();
-
-function pcmInt16ToWavBuffer(int16: Int16Array, sampleRate = 16000): Buffer {
-	const wav = new WaveFile();
-	wav.fromScratch(1, sampleRate, "16", int16);
-	return Buffer.from(wav.toBuffer());
-}
 
 async function sendAudioToGroq(
 	session: AppSession,
@@ -33,8 +21,7 @@ async function sendAudioToGroq(
 	const wavBuffer = pcmInt16ToWavBuffer(fullBuffer, sampleRate);
 	session.logger.info(`[Clairvoyant] WAV Buffer Size: ${wavBuffer.length}`);
 
-	const filePath = path.join(process.cwd(), `audio_${Date.now()}.wav`);
-	fs.writeFileSync(filePath, wavBuffer);
+	const filePath = writeTempWavFile(wavBuffer);
 
 	try {
 		const translation = await groq.audio.translations.create({
@@ -42,18 +29,25 @@ async function sendAudioToGroq(
 			model: "whisper-large-v3",
 		});
 		session.logger.info(translation.text);
-		return translation.text;
+		return cleanTranscription(translation.text);
 	} finally {
-		try {
-			fs.unlinkSync(filePath);
-			session.logger.info(`[Clairvoyant] Deleted temp file: ${filePath}`);
-		} catch (err) {
-			session.logger.warn(
-				`[Clairvoyant] Failed to delete temp file: ${filePath}`,
-			);
-			session.logger.warn(err);
-		}
+		deleteFileSafe(filePath, session.logger);
 	}
+}
+
+async function showReferenceCardWithTimeout(
+	session: AppSession,
+	title: string,
+	text: string,
+	options: { view?: ViewType; durationMs?: number } = {},
+) {
+	session.layouts.showReferenceCard(title, text, options);
+	const duration = options.durationMs ?? 10000;
+	await new Promise((resolve) => setTimeout(resolve, duration));
+	session.layouts.showReferenceCard("", "", {
+		view: ViewType.MAIN,
+		durationMs: 10000,
+	});
 }
 
 const PACKAGE_NAME =
@@ -85,36 +79,32 @@ class ExampleMentraOSApp extends AppServer {
 		session.events.onVoiceActivity((data) => {
 			const wasSpeaking = isSpeaking;
 			isSpeaking = data.status === true || data.status === "true";
-			session.layouts.showReferenceCard(
-				`. // Clairvoyant`,
-				`Recording...`,
-			);
+			session.layouts.showReferenceCard(`. // Clairvoyant`, `Recording...`);
 			session.logger.info(
 				`[Clairvoyant] VAD: wasSpeaking=${wasSpeaking}, isSpeaking=${isSpeaking}`,
 			);
 
 			if (wasSpeaking && !isSpeaking && audioBuffers.length > 0) {
 				(async () => {
-					await sendAudioToGroq(session, audioBuffers, 16000);
+					const text = await sendAudioToGroq(session, audioBuffers, 16000);
+					await showReferenceCardWithTimeout(
+						session,
+						`. // Clairvoyant`,
+						`${text}`,
+						{
+							view: ViewType.MAIN,
+							durationMs: 10000, // 10 seconds
+						},
+					);
 				})().catch(console.error);
 				audioBuffers = [];
-				session.logger.info(
-					`[Clairvoyant] Processed and cleared audio buffer after VAD stopped.`,
-				);
-				session.layouts.showReferenceCard(
-					`. // Clairvoyant`,
-					`Stopped recording.`,
-				);
+				session.logger.info(`[Clairvoyant] Processed and cleared Audio...`);
 			}
 		});
 
 		session.events.onAudioChunk((data) => {
 			if (isSpeaking) {
 				audioBuffers.push(new Int16Array(data.arrayBuffer));
-				session.logger.info(`[Clairvoyant] Recording...`);
-				session.logger.info(
-					`[Clairvoyant] AudioBuffer Size: ${audioBuffers.length}`,
-				);
 			}
 		});
 	}
