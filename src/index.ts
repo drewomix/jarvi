@@ -29,7 +29,8 @@ async function sendAudioToGroq(
 			model: "whisper-large-v3",
 		});
 		session.logger.info(translation.text);
-		return cleanTranscription(translation.text);
+		const answer = await cleanTranscription(session, translation.text);
+		return answer;
 	} finally {
 		deleteFileSafe(filePath, session.logger);
 	}
@@ -79,21 +80,22 @@ class ExampleMentraOSApp extends AppServer {
 		session.events.onVoiceActivity((data) => {
 			const wasSpeaking = isSpeaking;
 			isSpeaking = data.status === true || data.status === "true";
-			session.layouts.showReferenceCard(`. // Clairvoyant`, `Recording...`);
 			session.logger.info(
 				`[Clairvoyant] VAD: wasSpeaking=${wasSpeaking}, isSpeaking=${isSpeaking}`,
 			);
 
 			if (wasSpeaking && !isSpeaking && audioBuffers.length > 0) {
 				(async () => {
-					const text = await sendAudioToGroq(session, audioBuffers, 16000);
+					const answer = await sendAudioToGroq(session, audioBuffers, 16000);
+
+					// Display the transcription and answer if a question was detected
 					await showReferenceCardWithTimeout(
 						session,
 						`. // Clairvoyant`,
-						`${text}`,
+						answer.answer ?? "I'm not sure what you said.",
 						{
 							view: ViewType.MAIN,
-							durationMs: 10000, // 10 seconds
+							durationMs: 15000, // 10 seconds
 						},
 					);
 				})().catch(console.error);
