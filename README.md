@@ -98,6 +98,49 @@ ngrok http --url=hamster-select-anchovy.ngrok-free.app 3000
 
 ## Technical Details
 
+## Observations
+
+- The audio processing continues after the user stops speaking. Can be tested as follows: 
+
+```typescript
+session.events.onAudioChunk((data) => {
+			if (isSpeaking) {
+				audioBuffers.push(new Int16Array(data.arrayBuffer));
+				session.logger.info(
+					`[Clairvoyant] AudioBuffer Size: ${audioBuffers.length}`,
+				);
+			}
+		});
+```
+
+- A `.wav` file needs to be saved to then be sent to the Groq API. 
+
+```typescript
+async function sendAudioToGroq(
+	session: AppSession,
+	audioBuffers: Int16Array[],
+	sampleRate = 16000,
+) {
+	const fullBuffer = concatInt16Arrays(audioBuffers);
+	const wavBuffer = pcmInt16ToWavBuffer(fullBuffer, sampleRate);
+	session.logger.info(`[Clairvoyant] WAV Buffer Size: ${wavBuffer.length}`);
+
+	const filePath = writeTempWavFile(wavBuffer);
+
+	try {
+		const translation = await groq.audio.translations.create({
+			file: fs.createReadStream(filePath),
+			model: "whisper-large-v3",
+		});
+		session.logger.info(translation.text);
+		const answer = await cleanTranscription(session, translation.text);
+		return answer;
+	} finally {
+		deleteFileSafe(filePath, session.logger);
+	}
+}
+```
+
 ### Audio Processing
 - Captures audio as PCM Int16Array chunks at 16kHz sample rate
 - Concatenates chunks during voice activity periods
@@ -122,3 +165,4 @@ ngrok http --url=hamster-select-anchovy.ngrok-free.app 3000
 - Standard Node.js modules: `fs`, `path`
 
 This project was created using `bun init` in bun v1.2.12.
+
