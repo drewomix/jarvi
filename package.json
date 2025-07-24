@@ -1,0 +1,23 @@
+{
+	"name": "clairvoyant",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"devDependencies": {
+		"@biomejs/biome": "2.1.2",
+		"@types/bun": "latest",
+		"@types/node": "^24.1.0",
+		"tsx": "^4.20.3"
+	},
+	"scripts": {
+		"build": "tsc -p tsconfig.json",
+		"start": "bun run dist/index.js",
+		"dev": "bun --watch src/index.ts"
+	},
+	"peerDependencies": {
+		"typescript": "^5.8.3"
+	},
+	"dependencies": {
+		"@mentra/sdk": "^2.1.13"
+	}
+}
