@@ -1,5 +1,5 @@
 import { AppServer, type AppSession, ViewType } from "@mentra/sdk";
-import { answerQuestion } from "./utils/chat";
+import { b } from "../src/utils/baml_client";
 
 const PACKAGE_NAME =
 	process.env.PACKAGE_NAME ??
@@ -23,17 +23,19 @@ class Clairvoyant extends AppServer {
 	}
 
 	protected async onSession(session: AppSession): Promise<void> {
-        session.events.onTranscription(async (data) => {
-            if (!data.isFinal) return;
-            const result = await answerQuestion(session, data.text);
-            session.layouts.showDoubleTextWall(
-                result.has_question
-                    ? `// Clairvoyant\nQ: ${result.question}`
-                    : "No question detected.",
-                result.answer ? ` \nA: ${result.answer}` : "I'm not sure what you said.",
-                { view: ViewType.MAIN, durationMs: 15000 },
-            );
-        });
+		session.events.onTranscription(async (data) => {
+			if (!data.isFinal) return;
+			const result = await b.AnswerQuestion(data.text);
+			session.layouts.showDoubleTextWall(
+				result.has_question
+					? `// Clairvoyant\nQ: ${result.question}`
+					: "No question detected.",
+				result.answer
+					? ` \nA: ${result.answer}`
+					: "Couldn't hear you.",
+				{ view: ViewType.MAIN, durationMs: 15000 },
+			);
+		});
 	}
 }
 
