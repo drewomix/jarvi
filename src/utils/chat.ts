@@ -4,7 +4,7 @@ import OpenAI from "openai";
 interface QuestionAnalysisResponse {
 	original_text: string;
 	has_question: boolean;
-	question: string | null; // now a ≤10-word summary of the question
+	question: string | null;
 		answer: string | null;
 }
 
@@ -12,7 +12,7 @@ const openai = new OpenAI({
 	apiKey: process.env.OPENAI_API_KEY,
 });
 
-export async function cleanTranscription(
+export async function answerQuestion(
 	session: AppSession,
 	text: string,
 ): Promise<QuestionAnalysisResponse> {
