@@ -4,8 +4,8 @@ import OpenAI from "openai";
 interface QuestionAnalysisResponse {
 	original_text: string;
 	has_question: boolean;
-	question: string | null;
-	answer: string | null;
+	question: string | null; // now a ≤10-word summary of the question
+		answer: string | null;
 }
 
 const openai = new OpenAI({
@@ -24,12 +24,12 @@ export async function cleanTranscription(
 		);
 
 		const response = await openai.chat.completions.create({
-			model: "gpt-4o",
+			model: "gpt-4o-mini",
 			messages: [
 				{
 					role: "system",
 					content:
-						"You are a JSON-output assistant. Read the user's input text, detect if it contains a question. If yes, answer the question in 15 words or fewer. If no, skip the answer field. Always return valid JSON with these fields: original_text (string), has_question (boolean), question (string or null), answer (string or null). Do not include any extra keys or prose. If the answer can be answered in one word, return the answer in just one word.",
+						"You are a JSON-output assistant. Read the user's input text and determine if it contains a question. Return ONLY valid JSON with EXACTLY these fields: original_text (string), has_question (boolean), question (string or null), answer (string or null). Rules: 1) original_text: echo the input text verbatim. 2) has_question: true if a question exists, else false. 3) question: if has_question is true, provide a concise, optionally personable summary of the user's question in 10 words or fewer; do not include prefixed phrases like 'You asked'; if no question, return null. 4) answer: if has_question is true, answer in 15 words or fewer; otherwise null. Do not include any extra keys, comments, or prose.",
 				},
 				{
 					role: "user",
@@ -54,7 +54,6 @@ export async function cleanTranscription(
 			session.logger.info(`[Clairvoyant] No question detected in text`);
 		}
 
-		// Ensure all required fields are present
 		return {
 			original_text: result.original_text || trimmedText,
 			has_question: result.has_question || false,

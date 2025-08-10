@@ -24,6 +24,7 @@ async function sendAudioToGroq(
 	const filePath = writeTempWavFile(wavBuffer);
 
 	try {
+		session.logger.info(`[Clairvoyant] Sending audio to Groq...`);
 		const translation = await groq.audio.translations.create({
 			file: fs.createReadStream(filePath),
 			model: "whisper-large-v3",
@@ -34,21 +35,6 @@ async function sendAudioToGroq(
 	} finally {
 		deleteFileSafe(filePath, session.logger);
 	}
-}
-
-async function showReferenceCardWithTimeout(
-	session: AppSession,
-	title: string,
-	text: string,
-	options: { view?: ViewType; durationMs?: number } = {},
-) {
-	session.layouts.showReferenceCard(title, text, options);
-	const duration = options.durationMs ?? 10000;
-	await new Promise((resolve) => setTimeout(resolve, duration));
-	session.layouts.showReferenceCard("", "", {
-		view: ViewType.MAIN,
-		durationMs: 10000,
-	});
 }
 
 const PACKAGE_NAME =
@@ -71,10 +57,10 @@ class ExampleMentraOSApp extends AppServer {
 			port: PORT,
 		});
 	}
+
 	protected async onSession(session: AppSession): Promise<void> {
 		let isSpeaking = false;
 		let audioBuffers: Int16Array[] = [];
-
 		session.subscribe(StreamType.AUDIO_CHUNK);
 
 		session.events.onVoiceActivity((data) => {
@@ -88,15 +74,10 @@ class ExampleMentraOSApp extends AppServer {
 				(async () => {
 					const answer = await sendAudioToGroq(session, audioBuffers, 16000);
 
-					// Display the transcription and answer if a question was detected
-					await showReferenceCardWithTimeout(
-						session,
-						`. // Clairvoyant`,
-						answer.answer ?? "I'm not sure what you said.",
-						{
-							view: ViewType.MAIN,
-							durationMs: 15000, // 10 seconds
-						},
+					session.layouts.showDoubleTextWall(
+						answer.question ? `Q: ${answer.question}` : "No question detected.",
+						answer.answer ? `A: ${answer.answer}` : "I'm not sure what you said.",
+						{ view: ViewType.MAIN, durationMs: 10000 },
 					);
 				})().catch(console.error);
 				audioBuffers = [];
@@ -107,8 +88,17 @@ class ExampleMentraOSApp extends AppServer {
 		session.events.onAudioChunk((data) => {
 			if (isSpeaking) {
 				audioBuffers.push(new Int16Array(data.arrayBuffer));
+				session.logger.info(`[Clairvoyant] Pushed audio buffer. Total buffers: ${audioBuffers.length}`);
 			}
 		});
+
+		this.addCleanupHandler(() => {
+			audioBuffers = [];
+			isSpeaking = false;
+			session.logger.info(`[Clairvoyant] Cleared audio buffers on shutdown.`);
+		});
+
+		session.layouts.showDoubleTextWall('// Clairvoyant', 'I\'m ready when you are.', {durationMs: 1000 });
 	}
 }
 
