@@ -20,7 +20,7 @@ $ pnpm add @boundaryml/baml
 
 import type { Image, Audio, Pdf, Video } from "@boundaryml/baml"
 import type { Checked, Check } from "./types"
-import type {  QuestionAnalysisResponse } from "./types"
+import type {  AlertLite,  CurrentLite,  DailyForecastItem,  FormattedWeather,  LocationLite,  QuestionAnalysisResponse,  Router,  RoutingBehavior,  TempBlock,  WeatherConditionLite,  WeatherLines } from "./types"
 import type * as types from "./types"
 
 /******************************************************************************
@@ -36,10 +36,68 @@ export interface StreamState<T> {
 }
 
 export namespace partial_types {
+    export interface AlertLite {
+      sender_name?: string | null
+      event?: string | null
+      start?: number | null
+      end?: number | null
+      description?: string | null
+      tags: string[]
+    }
+    export interface CurrentLite {
+      temperature?: number | null
+      feels_like?: number | null
+      conditions?: WeatherConditionLite | null
+      humidity?: number | null
+      pressure?: number | null
+      wind_speed?: number | null
+      wind_direction?: number | null
+      visibility?: number | null
+      uv_index?: number | null
+      clouds?: number | null
+    }
+    export interface DailyForecastItem {
+      date?: string | null
+      summary?: string | null
+      temperature?: TempBlock | null
+      conditions?: WeatherConditionLite | null
+      precipitation_probability?: number | null
+      rain?: number | null
+    }
+    export interface FormattedWeather {
+      location?: LocationLite | null
+      current?: CurrentLite | null
+      daily_forecast: DailyForecastItem[]
+      alerts: AlertLite[]
+    }
+    export interface LocationLite {
+      lat?: number | null
+      lon?: number | null
+      timezone?: string | null
+    }
     export interface QuestionAnalysisResponse {
       original_text?: string | null
       has_question?: boolean | null
       question?: string | null
       answer?: string | null
+    }
+    export interface RoutingBehavior {
+      origin?: string | null
+      routing?: types.Router | null
+    }
+    export interface TempBlock {
+      day?: number | null
+      min?: number | null
+      max?: number | null
+      night?: number | null
+    }
+    export interface WeatherConditionLite {
+      id?: number | null
+      main?: string | null
+      description?: string | null
+      icon?: string | null
+    }
+    export interface WeatherLines {
+      lines: string[]
     }
 }

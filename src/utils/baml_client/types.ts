@@ -47,10 +47,91 @@ export function all_succeeded<CheckName extends string>(checks: Record<CheckName
 export function get_checks<CheckName extends string>(checks: Record<CheckName, Check>): Check[] {
     return Object.values(checks)
 }
+export enum Router {
+  WEATHER = "WEATHER",
+  WEB_SEARCH = "WEB_SEARCH",
+}
+
+export interface AlertLite {
+  sender_name: string
+  event: string
+  start: number
+  end: number
+  description: string
+  tags: string[]
+  
+}
+
+export interface CurrentLite {
+  temperature: number
+  feels_like: number
+  conditions: WeatherConditionLite
+  humidity: number
+  pressure: number
+  wind_speed: number
+  wind_direction: number
+  visibility: number
+  uv_index: number
+  clouds: number
+  
+}
+
+export interface DailyForecastItem {
+  date: string
+  summary: string
+  temperature: TempBlock
+  conditions: WeatherConditionLite
+  precipitation_probability: number
+  rain: number
+  
+}
+
+export interface FormattedWeather {
+  location: LocationLite
+  current: CurrentLite
+  daily_forecast: DailyForecastItem[]
+  alerts: AlertLite[]
+  
+}
+
+export interface LocationLite {
+  lat: number
+  lon: number
+  timezone: string
+  
+}
+
 export interface QuestionAnalysisResponse {
   original_text: string
   has_question: boolean
   question?: string | null
   answer?: string | null
+  
+}
+
+export interface RoutingBehavior {
+  origin: string
+  routing: Router
+  
+}
+
+export interface TempBlock {
+  day: number
+  min: number
+  max: number
+  night: number
+  
+}
+
+export interface WeatherConditionLite {
+  id: number
+  main: string
+  description: string
+  icon: string
+  
+}
+
+export interface WeatherLines {
+  lines: string[]
   
 }

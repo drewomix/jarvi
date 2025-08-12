@@ -6,7 +6,7 @@ class QuestionAnalysisResponse {
 }
 
 function AnswerQuestion(text: string) -> QuestionAnalysisResponse {
-  client "openai/gpt-4o-mini"
+  client "Groq"
   prompt #"
     You are an assistant that analyzes a user's message to determine if it contains a question.
     Instructions:
@@ -17,6 +17,7 @@ function AnswerQuestion(text: string) -> QuestionAnalysisResponse {
         Do not include prefixed phrases like 'You asked'.
       - answer: provide a direct answer in 15 words or fewer.
     - If no question is present, set question and answer to null.
+    - If the user's message appears to be referring to them speaking to another person then set has_question to false.
 
     {{ _.role("user") }} {{ text }}
 

@@ -27,25 +27,85 @@ export { FieldType, EnumBuilder, ClassBuilder }
 export default class TypeBuilder {
     private tb: _TypeBuilder;
     
+    AlertLite: ClassViewer<'AlertLite', "sender_name" | "event" | "start" | "end" | "description" | "tags">;
+    
+    CurrentLite: ClassViewer<'CurrentLite', "temperature" | "feels_like" | "conditions" | "humidity" | "pressure" | "wind_speed" | "wind_direction" | "visibility" | "uv_index" | "clouds">;
+    
+    DailyForecastItem: ClassViewer<'DailyForecastItem', "date" | "summary" | "temperature" | "conditions" | "precipitation_probability" | "rain">;
+    
+    FormattedWeather: ClassViewer<'FormattedWeather', "location" | "current" | "daily_forecast" | "alerts">;
+    
+    LocationLite: ClassViewer<'LocationLite', "lat" | "lon" | "timezone">;
+    
     QuestionAnalysisResponse: ClassViewer<'QuestionAnalysisResponse', "original_text" | "has_question" | "question" | "answer">;
     
+    RoutingBehavior: ClassViewer<'RoutingBehavior', "origin" | "routing">;
+    
+    TempBlock: ClassViewer<'TempBlock', "day" | "min" | "max" | "night">;
+    
+    WeatherConditionLite: ClassViewer<'WeatherConditionLite', "id" | "main" | "description" | "icon">;
+    
+    WeatherLines: ClassViewer<'WeatherLines', "lines">;
+    
+    
+    Router: EnumViewer<'Router', "WEATHER" | "WEB_SEARCH">;
     
 
     constructor() {
         this.tb = new _TypeBuilder({
           classes: new Set([
-            "QuestionAnalysisResponse",
+            "AlertLite","CurrentLite","DailyForecastItem","FormattedWeather","LocationLite","QuestionAnalysisResponse","RoutingBehavior","TempBlock","WeatherConditionLite","WeatherLines",
           ]),
           enums: new Set([
-            
+            "Router",
           ]),
           runtime: DO_NOT_USE_DIRECTLY_UNLESS_YOU_KNOW_WHAT_YOURE_DOING_RUNTIME
         });
+        
+        this.AlertLite = this.tb.classViewer("AlertLite", [
+          "sender_name","event","start","end","description","tags",
+        ]);
+        
+        this.CurrentLite = this.tb.classViewer("CurrentLite", [
+          "temperature","feels_like","conditions","humidity","pressure","wind_speed","wind_direction","visibility","uv_index","clouds",
+        ]);
+        
+        this.DailyForecastItem = this.tb.classViewer("DailyForecastItem", [
+          "date","summary","temperature","conditions","precipitation_probability","rain",
+        ]);
+        
+        this.FormattedWeather = this.tb.classViewer("FormattedWeather", [
+          "location","current","daily_forecast","alerts",
+        ]);
+        
+        this.LocationLite = this.tb.classViewer("LocationLite", [
+          "lat","lon","timezone",
+        ]);
         
         this.QuestionAnalysisResponse = this.tb.classViewer("QuestionAnalysisResponse", [
           "original_text","has_question","question","answer",
         ]);
         
+        this.RoutingBehavior = this.tb.classViewer("RoutingBehavior", [
+          "origin","routing",
+        ]);
+        
+        this.TempBlock = this.tb.classViewer("TempBlock", [
+          "day","min","max","night",
+        ]);
+        
+        this.WeatherConditionLite = this.tb.classViewer("WeatherConditionLite", [
+          "id","main","description","icon",
+        ]);
+        
+        this.WeatherLines = this.tb.classViewer("WeatherLines", [
+          "lines",
+        ]);
+        
+        
+        this.Router = this.tb.enumViewer("Router", [
+          "WEATHER","WEB_SEARCH",
+        ]);
         
     }
 
