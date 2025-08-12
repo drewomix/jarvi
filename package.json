@@ -12,12 +12,16 @@
 	"scripts": {
 		"build": "tsc -p tsconfig.json",
 		"start": "bun run dist/index.js",
-		"dev": "bun --watch src/index.ts"
+		"dev": "bun --watch src/index.ts",
+		"test": "bun test",
+		"test:watch": "bun test --watch",
+		"test:coverage": "bun test --coverage"
 	},
 	"peerDependencies": {
 		"typescript": "^5.8.3"
 	},
 	"dependencies": {
+		"@boundaryml/baml": "^0.204.0",
 		"@mentra/sdk": "^2.1.18",
 		"dotenv": "^17.2.1",
 		"openai": "^5.12.2"

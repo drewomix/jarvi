@@ -1,5 +1,7 @@
-import { AppServer, type AppSession, ViewType } from "@mentra/sdk";
-import { answerQuestion } from "./utils/chat";
+import { AppServer, type AppSession } from "@mentra/sdk";
+import { RateLimiter } from "./utils/tools/rateLimiting";
+import { getWeatherData } from "./utils/tools/weatherCall";
+import { handleTranscription } from "./utils/transcriptionHandler";
 
 const PACKAGE_NAME =
 	process.env.PACKAGE_NAME ??
@@ -14,26 +16,28 @@ const MENTRAOS_API_KEY =
 const PORT = parseInt(process.env.PORT || "3000");
 
 class Clairvoyant extends AppServer {
+	private questionRateLimiter: RateLimiter;
+
 	constructor() {
 		super({
 			packageName: PACKAGE_NAME,
 			apiKey: MENTRAOS_API_KEY,
 			port: PORT,
 		});
+
+		this.questionRateLimiter = new RateLimiter(1000);
 	}
 
 	protected async onSession(session: AppSession): Promise<void> {
-        session.events.onTranscription(async (data) => {
-            if (!data.isFinal) return;
-            const result = await answerQuestion(session, data.text);
-            session.layouts.showDoubleTextWall(
-                result.has_question
-                    ? `// Clairvoyant\nQ: ${result.question}`
-                    : "No question detected.",
-                result.answer ? ` \nA: ${result.answer}` : "I'm not sure what you said.",
-                { view: ViewType.MAIN, durationMs: 15000 },
-            );
-        });
+
+
+		session.events.onTranscription(async (data) => {
+			if (!data.isFinal) return;
+			if (this.questionRateLimiter.shouldSkip(session.logger, "Clairvoyant")) {
+				return;
+			}
+			await handleTranscription(data, session);
+		});
 	}
 }
 
