@@ -48,7 +48,7 @@ export default class TypeBuilder {
     WeatherLines: ClassViewer<'WeatherLines', "lines">;
     
     
-    Router: EnumViewer<'Router', "WEATHER" | "WEB_SEARCH">;
+    Router: EnumViewer<'Router', "WEATHER" | "WEB_SEARCH" | "LLM_CALL">;
     
 
     constructor() {
@@ -104,7 +104,7 @@ export default class TypeBuilder {
         
         
         this.Router = this.tb.enumViewer("Router", [
-          "WEATHER","WEB_SEARCH",
+          "WEATHER","WEB_SEARCH","LLM_CALL",
         ]);
         
     }

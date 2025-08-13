@@ -1,6 +1,7 @@
 enum Router {
     WEATHER
     WEB_SEARCH
+    LLM_CALL
 }
 
 class RoutingBehavior {
@@ -9,9 +10,9 @@ class RoutingBehavior {
 }
 
 function Route(text: string) -> RoutingBehavior {
-    client "Groq"
+    client "GroqHeavy"
     prompt #"
-        You are a routing assistant. You are given a user's message and you need to determine which router to use. If the user's message does not contain a question, return NONE.
+        You are a routing assistant. You are given a user's message and you need to determine which router to use. If a query feels ambiguous, return LLM_CALL.
         {{ _.role("user") }} {{ text }}
         {{ ctx.output_format }}
     "#
@@ -31,4 +32,12 @@ test test_web_search {
         text "Who is the current president of the United States?"
     }
     @@assert( {{ this.routing == "WEB_SEARCH"}})
+}
+
+test test_llm_call {
+    functions [Route]
+    args {
+        text "Why is the UV index such an important metric to measure in NYC?"
+    }
+    @@assert( {{ this.routing == "LLM_CALL"}})
 }
