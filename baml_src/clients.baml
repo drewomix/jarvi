@@ -17,6 +17,15 @@ client<llm> Groq {
   }
 }
 
+client<llm> GroqHeavy {
+  provider openai-generic
+  options {
+    base_url "https://api.groq.com/openai/v1"
+    api_key env.GROQ_API_KEY
+    model "openai/gpt-oss-120b"
+  }
+}
+
 
 client<llm> CustomGPT4oMini {
   provider openai

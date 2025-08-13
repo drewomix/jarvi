@@ -50,6 +50,7 @@ export function get_checks<CheckName extends string>(checks: Record<CheckName, C
 export enum Router {
   WEATHER = "WEATHER",
   WEB_SEARCH = "WEB_SEARCH",
+  LLM_CALL = "LLM_CALL",
 }
 
 export interface AlertLite {
