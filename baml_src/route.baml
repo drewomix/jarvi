@@ -11,7 +11,7 @@ class RoutingBehavior {
 function Route(text: string) -> RoutingBehavior {
     client "Groq"
     prompt #"
-        You are a routing assistant. You are given a user's message and you need to determine which router to use.
+        You are a routing assistant. You are given a user's message and you need to determine which router to use. If the user's message does not contain a question, return NONE.
         {{ _.role("user") }} {{ text }}
         {{ ctx.output_format }}
     "#
