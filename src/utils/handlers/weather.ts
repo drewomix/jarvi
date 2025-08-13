@@ -4,23 +4,65 @@ import { getWeatherData } from "../tools/weatherCall";
 
 const weatherRunIds = new WeakMap<AppSession, number>();
 
+async function showTextWallDuringOperation<T>(
+	session: AppSession,
+	loadingText: string,
+	asyncOperation: () => Promise<T>,
+	options: {
+		view?: ViewType;
+		clearDurationMs?: number;
+	} = {},
+): Promise<T> {
+	const { view = ViewType.MAIN, clearDurationMs = 500 } = options;
+
+	// Show the loading message
+	session.layouts.showTextWall(loadingText, {
+		view,
+		durationMs: 30000,
+	});
+
+	try {
+		const result = await asyncOperation();
+
+		session.layouts.showTextWall("", {
+			view,
+			durationMs: clearDurationMs,
+		});
+
+		return result;
+	} catch (error) {
+		session.layouts.showTextWall("", {
+			view,
+			durationMs: clearDurationMs,
+		});
+		throw error;
+	}
+}
+
 export async function startWeatherFlow(session: AppSession) {
 	session.layouts.showTextWall("// Clairvoyant\nW: Looking outside...", {
 		view: ViewType.MAIN,
 		durationMs: 2000,
 	});
 
-
 	const runId = Date.now();
 	weatherRunIds.set(session, runId);
 
 	let locationReceived = false;
+	let weatherTextWallShown = false;
 
 	const unsubscribe = session.events.onLocation(async (location) => {
 		if (weatherRunIds.get(session) !== runId) {
 			session.logger.info(
 				`[Clairvoyant] Ignoring stale location callback (runId: ${runId})`,
 			);
+			// Clear any lingering text wall from stale requests
+			if (weatherTextWallShown) {
+				session.layouts.showTextWall("", {
+					view: ViewType.MAIN,
+					durationMs: 500,
+				});
+			}
 			return;
 		}
 
@@ -34,15 +76,17 @@ export async function startWeatherFlow(session: AppSession) {
 				`[Clairvoyant] Location received: ${location.lat}, ${location.lng}`,
 			);
 
-			session.layouts.showTextWall(
+			weatherTextWallShown = true;
+
+			// Use the helper function to show "Getting the weather..." during the API call
+			const response = await showTextWallDuringOperation(
+				session,
 				"// Clairvoyant\nW: Getting the weather...",
-				{
-					view: ViewType.MAIN,
-					durationMs: 1500,
-				},
+				() => getWeatherData(location.lat, location.lng),
 			);
 
-			const response = await getWeatherData(location.lat, location.lng);
+			weatherTextWallShown = false;
+
 			if (!response) {
 				throw new Error("No weather response");
 			}
@@ -72,6 +116,7 @@ export async function startWeatherFlow(session: AppSession) {
 				}
 			}
 		} catch (err) {
+			weatherTextWallShown = false;
 			session.logger.error(`[Clairvoyant] Weather flow error: ${String(err)}`);
 
 			if (weatherRunIds.get(session) === runId) {
@@ -86,28 +131,8 @@ export async function startWeatherFlow(session: AppSession) {
 		}
 	});
 
-	try {
-		session.location
-			.getLatestLocation({ accuracy: "high" })
-			.then((location) => {
-				session.logger.info(
-					`[Clairvoyant] Location: ${location.lat}, ${location.lng}`,
-				);
-				session.logger.info(`[Clairvoyant] Location request initiated`);
-			})
-			.catch((err) => {
-				session.logger.warn(
-					`[Clairvoyant] Could not request location: ${String(err)}`,
-				);
-			});
-	} catch (err) {
-		session.logger.warn(
-			`[Clairvoyant] Location request not available: ${String(err)}`,
-		);
-	}
-
 	const TIMEOUT_MS = 6000;
-	
+
 	setTimeout(() => {
 		if (weatherRunIds.get(session) !== runId) return;
 
@@ -117,6 +142,13 @@ export async function startWeatherFlow(session: AppSession) {
 			);
 
 			unsubscribe?.();
+
+			if (weatherTextWallShown) {
+				session.layouts.showTextWall("", {
+					view: ViewType.MAIN,
+					durationMs: 500,
+				});
+			}
 
 			session.layouts.showTextWall(
 				"// Clairvoyant\nW: Still waiting on location…",
