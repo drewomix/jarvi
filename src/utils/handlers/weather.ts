@@ -1,16 +1,10 @@
-/**
- * Non-blocking weather flow with improved UX and race condition handling
- */
-
 import { type AppSession, ViewType } from "@mentra/sdk";
 import { b } from "../baml_client";
 import { getWeatherData } from "../tools/weatherCall";
 
-// Store weather run IDs to prevent race conditions
 const weatherRunIds = new WeakMap<AppSession, number>();
 
 export async function startWeatherFlow(session: AppSession) {
-	// UI: immediate feedback while waiting for location
 	session.layouts.showTextWall("// Clairvoyant\nW: Looking outside...", {
 		view: ViewType.MAIN,
 		durationMs: 2000,
@@ -21,7 +15,6 @@ export async function startWeatherFlow(session: AppSession) {
 	weatherRunIds.set(session, runId);
 
 	let locationReceived = false;
-
 
 	const unsubscribe = session.events.onLocation(async (location) => {
 		if (weatherRunIds.get(session) !== runId) {
@@ -114,6 +107,7 @@ export async function startWeatherFlow(session: AppSession) {
 	}
 
 	const TIMEOUT_MS = 6000;
+	
 	setTimeout(() => {
 		if (weatherRunIds.get(session) !== runId) return;
 

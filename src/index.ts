@@ -1,7 +1,6 @@
 import { AppServer, type AppSession } from "@mentra/sdk";
 import { RateLimiter } from "./utils/tools/rateLimiting";
-import { getWeatherData } from "./utils/tools/weatherCall";
-import { handleTranscription } from "./utils/transcriptionHandler";
+import { handleTranscription } from "./utils/transcriptionFlow";
 
 const PACKAGE_NAME =
 	process.env.PACKAGE_NAME ??
