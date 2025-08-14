@@ -1,5 +1,5 @@
 import { AppServer, type AppSession } from "@mentra/sdk";
-import { RateLimiter } from "./utils/tools/rateLimiting";
+import { RateLimiter } from "./utils/core/rateLimiting";
 import { handleTranscription } from "./utils/transcriptionFlow";
 
 const PACKAGE_NAME =
@@ -28,8 +28,6 @@ class Clairvoyant extends AppServer {
 	}
 
 	protected async onSession(session: AppSession): Promise<void> {
-
-
 		session.events.onTranscription(async (data) => {
 			if (!data.isFinal) return;
 			if (this.questionRateLimiter.shouldSkip(session.logger, "Clairvoyant")) {

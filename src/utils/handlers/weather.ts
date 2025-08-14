@@ -1,43 +1,9 @@
 import { type AppSession, ViewType } from "@mentra/sdk";
 import { b } from "../baml_client";
+import { showTextWallDuringOperation } from "../core/textWall";
 import { getWeatherData } from "../tools/weatherCall";
 
 const weatherRunIds = new WeakMap<AppSession, number>();
-
-async function showTextWallDuringOperation<T>(
-	session: AppSession,
-	loadingText: string,
-	asyncOperation: () => Promise<T>,
-	options: {
-		view?: ViewType;
-		clearDurationMs?: number;
-	} = {},
-): Promise<T> {
-	const { view = ViewType.MAIN, clearDurationMs = 500 } = options;
-
-	// Show the loading message
-	session.layouts.showTextWall(loadingText, {
-		view,
-		durationMs: 30000,
-	});
-
-	try {
-		const result = await asyncOperation();
-
-		session.layouts.showTextWall("", {
-			view,
-			durationMs: clearDurationMs,
-		});
-
-		return result;
-	} catch (error) {
-		session.layouts.showTextWall("", {
-			view,
-			durationMs: clearDurationMs,
-		});
-		throw error;
-	}
-}
 
 export async function startWeatherFlow(session: AppSession) {
 	session.layouts.showTextWall("// Clairvoyant\nW: Looking outside...", {
