@@ -24,6 +24,7 @@
 		"@boundaryml/baml": "^0.204.0",
 		"@mentra/sdk": "^2.1.18",
 		"dotenv": "^17.2.1",
+		"exa-js": "^1.8.27",
 		"openai": "^5.12.2"
 	}
 }
