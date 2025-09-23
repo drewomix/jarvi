@@ -1,0 +1,200 @@
+---
+name: Multi-Line Output Pattern for IoT Devices
+description: This design pattern defines how to handle multi-line text outputs on IoT devices using the Mentra SDK. The pattern ensures that complex information is displayed in a user-friendly, sequential manner that respects the device's display limitations and user experience.
+---
+
+## Core Pattern Components
+
+### 1. BAML Output Schema Design
+When designing BAML functions that return multi-line content, use a structured output with a `lines` array:
+
+```baml
+class MultiLineResponse {
+  lines string[] @description("Array of text lines to display sequentially")
+}
+```
+
+**Key Design Principles:**
+- Always use `string[]` for multi-line outputs
+- Each line should be self-contained and meaningful
+- Lines should be ordered from most important to least important
+- Avoid nested arrays or complex structures in the lines array
+
+### 2. Handler Implementation Pattern
+Implement handlers using this consistent pattern:
+
+```typescript
+export async function handleMultiLineFlow(session: AppSession, data: any) {
+  const runId = Date.now();
+  const runIds = new WeakMap<AppSession, number>();
+  runIds.set(session, runId);
+
+  try {
+    // Get multi-line response from BAML function
+    const response = await b.YourBAMLFunction(data);
+    
+    // Validate response has lines
+    if (!response.lines || response.lines.length === 0) {
+      throw new Error("No lines in response");
+    }
+
+    // Check if this is still the current request
+    if (runIds.get(session) !== runId) {
+      session.logger.info(`[App] Response arrived for stale request, discarding`);
+      return;
+    }
+
+    // Display each line sequentially
+    for (let i = 0; i < response.lines.length; i++) {
+      const line = response.lines[i];
+
+      // Check if this is still the current request before each line
+      if (runIds.get(session) !== runId) return;
+
+      session.logger.info(`[App] Displaying line ${i + 1}: ${line}`);
+      session.layouts.showTextWall(`// App\n${line}`, {
+        view: ViewType.MAIN,
+        durationMs: 3000, // Adjust based on line complexity
+      });
+
+      // Add delay between lines (except for the last line)
+      if (i < response.lines.length - 1) {
+        await new Promise((resolve) => setTimeout(resolve, 3000));
+      }
+    }
+  } catch (err) {
+    session.logger.error(`[App] Multi-line flow error: ${String(err)}`);
+    
+    if (runIds.get(session) === runId) {
+      session.layouts.showTextWall("// App\nCouldn't process that request.", {
+        view: ViewType.MAIN,
+        durationMs: 2000,
+      });
+    }
+  }
+}
+```
+
+### 3. Request Lifecycle Management
+Use WeakMap-based run IDs to handle concurrent requests:
+
+```typescript
+const runIds = new WeakMap<AppSession, number>();
+
+export async function startFlow(session: AppSession) {
+  const runId = Date.now();
+  runIds.set(session, runId);
+  
+  // Your flow logic here
+  // Always check runIds.get(session) === runId before displaying content
+}
+```
+
+### 4. Loading States and Error Handling
+Implement consistent loading and error states:
+
+```typescript
+// Show loading during async operations
+const response = await showTextWallDuringOperation(
+  session,
+  "// App\nProcessing...",
+  () => b.YourBAMLFunction(data),
+);
+
+// Handle errors gracefully
+if (runIds.get(session) === runId) {
+  session.layouts.showTextWall("// App\nSomething went wrong.", {
+    view: ViewType.MAIN,
+    durationMs: 2000,
+  });
+}
+```
+
+## Implementation Guidelines
+
+### BAML Function Design
+1. **Output Structure**: Always return a `lines` array for multi-line content
+2. **Line Length**: Keep each line under 50 characters for optimal display
+3. **Line Count**: Limit to 3-5 lines maximum for user experience
+4. **Content Priority**: Order lines by importance (most important first)
+
+### Handler Implementation
+1. **Request Tracking**: Use WeakMap with run IDs for concurrent request handling
+2. **Sequential Display**: Display lines one at a time with appropriate delays
+3. **Stale Request Handling**: Check run ID before each display operation
+4. **Error Boundaries**: Wrap all operations in try-catch with user-friendly error messages
+5. **Logging**: Log each line display for debugging
+
+### Timing Considerations
+- **Line Duration**: 3000ms for standard lines, adjust based on complexity
+- **Line Spacing**: 3000ms delay between lines
+- **Loading Duration**: 30000ms for async operations
+- **Error Duration**: 2000ms for error messages
+
+## Example Use Cases
+
+### Weather Information
+```baml
+class WeatherLines {
+  lines string[] @description("Weather summary lines")
+}
+```
+
+### News Headlines
+```baml
+class NewsLines {
+  lines string[] @description("News headline lines")
+}
+```
+
+### Task Lists
+```baml
+class TaskLines {
+  lines string[] @description("Task summary lines")
+}
+```
+
+### Status Updates
+```baml
+class StatusLines {
+  lines string[] @description("Status update lines")
+}
+```
+
+## Best Practices
+
+1. **Consistency**: Always use the same pattern across all multi-line handlers
+2. **User Experience**: Consider reading time and cognitive load
+3. **Error Handling**: Provide clear, actionable error messages
+4. **Performance**: Implement proper request cancellation for stale requests
+5. **Logging**: Maintain comprehensive logging for debugging
+6. **Testing**: Test with various line counts and content types
+
+## Anti-Patterns to Avoid
+
+1. **Single String Outputs**: Don't return a single long string for multi-line content
+2. **Nested Arrays**: Avoid complex nested structures in the lines array
+3. **Synchronous Display**: Don't display all lines simultaneously
+4. **No Request Tracking**: Don't skip run ID tracking for concurrent requests
+5. **Inconsistent Timing**: Don't use random or inconsistent display durations
+6. **Poor Error Handling**: Don't let errors crash the display flow
+
+## Integration with Transcription Flow
+
+When integrating with the main transcription handler:
+
+```typescript
+export async function handleTranscription(data: TranscriptionData, session: AppSession) {
+  const routing = await b.Route(data.text);
+  
+  switch (routing.routing) {
+    case Router.WEATHER:
+      void startWeatherFlow(session);
+      return;
+    case Router.NEWS:
+      void startNewsFlow(session);
+      return;
+    // ... other cases
+  }
+}
+```

@@ -20,7 +20,7 @@ $ pnpm add @boundaryml/baml
 
 import type { Image, Audio, Pdf, Video } from "@boundaryml/baml"
 import type { Checked, Check } from "./types"
-import type {  AlertLite,  CurrentLite,  DailyForecastItem,  FormattedWeather,  LocationLite,  QuestionAnalysisResponse,  Router,  RoutingBehavior,  TempBlock,  WeatherConditionLite,  WeatherLines } from "./types"
+import type {  AlertLite,  AnswerLines,  CurrentLite,  DailyForecastItem,  FormattedWeather,  LocationLite,  NewsItem,  QueryResult,  QuestionAnalysisResponse,  Router,  RoutingBehavior,  TempBlock,  WeatherConditionLite,  WeatherLines } from "./types"
 import type * as types from "./types"
 
 /******************************************************************************
@@ -43,6 +43,9 @@ export namespace partial_types {
       end?: number | null
       description?: string | null
       tags: string[]
+    }
+    export interface AnswerLines {
+      lines: string[]
     }
     export interface CurrentLite {
       temperature?: number | null
@@ -74,6 +77,14 @@ export namespace partial_types {
       lat?: number | null
       lon?: number | null
       timezone?: string | null
+    }
+    export interface NewsItem {
+      title?: string | null
+      content?: string | null
+    }
+    export interface QueryResult {
+      query?: string | null
+      results: AnswerLines[]
     }
     export interface QuestionAnalysisResponse {
       original_text?: string | null

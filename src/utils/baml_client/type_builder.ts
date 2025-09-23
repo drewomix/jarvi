@@ -29,6 +29,8 @@ export default class TypeBuilder {
     
     AlertLite: ClassViewer<'AlertLite', "sender_name" | "event" | "start" | "end" | "description" | "tags">;
     
+    AnswerLines: ClassViewer<'AnswerLines', "lines">;
+    
     CurrentLite: ClassViewer<'CurrentLite', "temperature" | "feels_like" | "conditions" | "humidity" | "pressure" | "wind_speed" | "wind_direction" | "visibility" | "uv_index" | "clouds">;
     
     DailyForecastItem: ClassViewer<'DailyForecastItem', "date" | "summary" | "temperature" | "conditions" | "precipitation_probability" | "rain">;
@@ -36,6 +38,10 @@ export default class TypeBuilder {
     FormattedWeather: ClassViewer<'FormattedWeather', "location" | "current" | "daily_forecast" | "alerts">;
     
     LocationLite: ClassViewer<'LocationLite', "lat" | "lon" | "timezone">;
+    
+    NewsItem: ClassViewer<'NewsItem', "title" | "content">;
+    
+    QueryResult: ClassViewer<'QueryResult', "query" | "results">;
     
     QuestionAnalysisResponse: ClassViewer<'QuestionAnalysisResponse', "original_text" | "has_question" | "question" | "answer">;
     
@@ -54,7 +60,7 @@ export default class TypeBuilder {
     constructor() {
         this.tb = new _TypeBuilder({
           classes: new Set([
-            "AlertLite","CurrentLite","DailyForecastItem","FormattedWeather","LocationLite","QuestionAnalysisResponse","RoutingBehavior","TempBlock","WeatherConditionLite","WeatherLines",
+            "AlertLite","AnswerLines","CurrentLite","DailyForecastItem","FormattedWeather","LocationLite","NewsItem","QueryResult","QuestionAnalysisResponse","RoutingBehavior","TempBlock","WeatherConditionLite","WeatherLines",
           ]),
           enums: new Set([
             "Router",
@@ -64,6 +70,10 @@ export default class TypeBuilder {
         
         this.AlertLite = this.tb.classViewer("AlertLite", [
           "sender_name","event","start","end","description","tags",
+        ]);
+        
+        this.AnswerLines = this.tb.classViewer("AnswerLines", [
+          "lines",
         ]);
         
         this.CurrentLite = this.tb.classViewer("CurrentLite", [
@@ -80,6 +90,14 @@ export default class TypeBuilder {
         
         this.LocationLite = this.tb.classViewer("LocationLite", [
           "lat","lon","timezone",
+        ]);
+        
+        this.NewsItem = this.tb.classViewer("NewsItem", [
+          "title","content",
+        ]);
+        
+        this.QueryResult = this.tb.classViewer("QueryResult", [
+          "query","results",
         ]);
         
         this.QuestionAnalysisResponse = this.tb.classViewer("QuestionAnalysisResponse", [
