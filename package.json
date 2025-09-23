@@ -21,6 +21,7 @@
 	},
 	"dependencies": {
 		"@boundaryml/baml": "^0.208.2",
+		"@honcho-ai/sdk": "^1.4.0",
 		"@mentra/sdk": "^2.1.23",
 		"@t3-oss/env-core": "^0.13.8",
 		"@tavily/core": "^0.5.12",
