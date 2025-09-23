@@ -23,6 +23,8 @@
 	"dependencies": {
 		"@boundaryml/baml": "^0.204.0",
 		"@mentra/sdk": "^2.1.18",
+		"@t3-oss/env-core": "^0.13.8",
+		"@tavily/core": "^0.5.12",
 		"dotenv": "^17.2.1",
 		"exa-js": "^1.8.27",
 		"openai": "^5.12.2"

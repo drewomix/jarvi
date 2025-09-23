@@ -27,12 +27,24 @@ class Clairvoyant extends AppServer {
 		this.questionRateLimiter = new RateLimiter(1000);
 	}
 
-	protected async onSession(session: AppSession): Promise<void> {
+	protected override async onSession(session: AppSession): Promise<void> {
 		session.events.onTranscription(async (data) => {
+			// If its not a final utterance, skip
 			if (!data.isFinal) return;
+
+			// If the audio segment causing this transcription is too short, skip
+			if (data.duration) {
+				if (data.duration < 200) {
+					return;
+				}
+			}
+
+			// If the question rate limiter is triggered, skip
 			if (this.questionRateLimiter.shouldSkip(session.logger, "Clairvoyant")) {
 				return;
 			}
+
+			// Handle the transcription
 			await handleTranscription(data, session);
 		});
 	}

@@ -1,6 +1,6 @@
 import { type AppSession, ViewType } from "@mentra/sdk";
 import { b } from "../baml_client";
-import { showTextWallDuringOperation } from "../core/textWall";
+import { showTextDuringOperation } from "../core/textWall";
 import { getWeatherData } from "../tools/weatherCall";
 
 const weatherRunIds = new WeakMap<AppSession, number>();
@@ -45,9 +45,11 @@ export async function startWeatherFlow(session: AppSession) {
 			weatherTextWallShown = true;
 
 			// Use the helper function to show "Getting the weather..." during the API call
-			const response = await showTextWallDuringOperation(
+			const response = await showTextDuringOperation(
 				session,
 				"// Clairvoyant\nW: Getting the weather...",
+				"// Clairvoyant\nW: Got the weather!",
+				"// Clairvoyant\nW: Couldn't get the weather.",
 				() => getWeatherData(location.lat, location.lng),
 			);
 

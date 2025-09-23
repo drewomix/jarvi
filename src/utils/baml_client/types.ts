@@ -63,6 +63,11 @@ export interface AlertLite {
   
 }
 
+export interface AnswerLines {
+  lines: string[]
+  
+}
+
 export interface CurrentLite {
   temperature: number
   feels_like: number
@@ -99,6 +104,18 @@ export interface LocationLite {
   lat: number
   lon: number
   timezone: string
+  
+}
+
+export interface NewsItem {
+  title: string
+  content: string
+  
+}
+
+export interface QueryResult {
+  query: string
+  results: AnswerLines[]
   
 }
 

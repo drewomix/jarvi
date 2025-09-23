@@ -1,9 +1,13 @@
 import type { AppSession } from "@mentra/sdk";
 import { type TranscriptionData, ViewType } from "@mentra/sdk";
 import { b, Router } from "./baml_client";
+import { startWebSearchFlow } from "./handlers/search";
 import { startWeatherFlow } from "./handlers/weather";
 
-export async function handleTranscription(data: TranscriptionData, session: AppSession) {
+export async function handleTranscription(
+	data: TranscriptionData,
+	session: AppSession,
+) {
 	session.logger.info(`[Clairvoyant] Transcription: ${data.text}`);
 	const routing = await b.Route(data.text);
 	if (!routing.routing) {
@@ -16,6 +20,13 @@ export async function handleTranscription(data: TranscriptionData, session: AppS
 			void startWeatherFlow(session);
 			return;
 
+		case Router.WEB_SEARCH:
+			session.logger.info(
+				`[Clairvoyant] Web search route: starting async flow`,
+			);
+			void startWebSearchFlow(data.text, session);
+			return;
+
 		default: {
 			session.logger.info(`[Clairvoyant] Routing: Answering the question`);
 			const response = await b.AnswerQuestion(data.text);
@@ -25,10 +36,10 @@ export async function handleTranscription(data: TranscriptionData, session: AppS
 					{ view: ViewType.MAIN, durationMs: 10000 },
 				);
 			} else {
-				session.layouts.showTextWall(
-					``,
-					{ view: ViewType.MAIN, durationMs: 2000 },
-				);
+				session.layouts.showTextWall(``, {
+					view: ViewType.MAIN,
+					durationMs: 2000,
+				});
 			}
 			return response;
 		}
