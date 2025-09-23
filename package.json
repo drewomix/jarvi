@@ -13,7 +13,7 @@
 		"build": "tsc -p tsconfig.json",
 		"start": "bun run dist/index.js",
 		"dev": "bun --watch src/index.ts",
-		"test": "bun test",
+		"test": "bun test && bun run baml-cli test",
 		"test:watch": "bun test --watch",
 		"test:coverage": "bun test --coverage"
 	},
