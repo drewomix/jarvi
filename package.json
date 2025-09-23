@@ -10,12 +10,10 @@
 		"tsx": "^4.20.3"
 	},
 	"scripts": {
-		"build": "tsc -p tsconfig.json",
-		"start": "bun run dist/index.js",
+		"build": "tsc",
+		"start": "bun run src/index.ts",
 		"dev": "bun --watch src/index.ts",
-		"test": "bun test && bun run baml-cli test",
-		"test:watch": "bun test --watch",
-		"test:coverage": "bun test --coverage"
+		"test": "bun run baml-cli test"
 	},
 	"peerDependencies": {
 		"typescript": "^5.8.3"
