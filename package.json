@@ -6,8 +6,8 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.1.2",
 		"@types/bun": "latest",
-		"@types/node": "^24.2.1",
-		"tsx": "^4.20.3"
+		"@types/node": "^24.5.2",
+		"tsx": "^4.20.5"
 	},
 	"scripts": {
 		"build": "tsc",
@@ -20,11 +20,11 @@
 	},
 	"dependencies": {
 		"@boundaryml/baml": "^0.204.0",
-		"@mentra/sdk": "^2.1.18",
+		"@mentra/sdk": "^2.1.23",
 		"@t3-oss/env-core": "^0.13.8",
 		"@tavily/core": "^0.5.12",
-		"dotenv": "^17.2.1",
-		"exa-js": "^1.8.27",
-		"openai": "^5.12.2"
+		"dotenv": "^17.2.2",
+		"exa-js": "^1.9.3",
+		"openai": "^5.22.1"
 	}
 }
