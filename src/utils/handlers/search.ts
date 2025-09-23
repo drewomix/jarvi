@@ -7,55 +7,75 @@ import { performWebSearch } from "../tools/webSearch";
 const webSearchRunIds = new WeakMap<AppSession, number>();
 
 export async function startWebSearchFlow(query: string, session: AppSession) {
-	const runId = Date.now();
-	webSearchRunIds.set(session, runId);
+        const runId = Date.now();
+        webSearchRunIds.set(session, runId);
 
-	session.logger.info(
-		`[startWebSearchFlow] Starting web search flow for query: ${query}`,
-	);
+        session.logger.info(
+                `[startWebSearchFlow] Starting web search flow for query: ${query}`,
+        );
 
-	const searchResults = await showTextDuringOperation(
-		session,
-		"// Clairvoyant\nW: Searching the web...",
-		"// Clairvoyant\nW: Found it!",
-		"// Clairvoyant\nW: Couldn't search the web.",
-		() => performWebSearch(query),
-	);
+        try {
+                const searchResults = await showTextDuringOperation(
+                        session,
+                        "// Clairvoyant\nW: Searching the web...",
+                        "// Clairvoyant\nW: Found it!",
+                        "// Clairvoyant\nW: Couldn't search the web.",
+                        () => performWebSearch(query),
+                );
 
-	if (!searchResults) {
-		throw new Error("No response from web search");
-	}
+                if (!searchResults) {
+                        throw new Error("No response from web search");
+                }
 
-	if (webSearchRunIds.get(session) !== runId) {
-		session.logger.info(
-			`[startWebSearchFlow] Web search response arrived for stale request, discarding`,
-		);
-		return;
-	}
-	const answerLines = await b.AnswerSearch(query, searchResults);
+                if (webSearchRunIds.get(session) !== runId) {
+                        session.logger.info(
+                                `[startWebSearchFlow] Web search response arrived for stale request, discarding`,
+                        );
+                        return;
+                }
 
-	const lines = answerLines.results[0]?.lines;
+                const answerLines = await b.AnswerSearch(query, searchResults);
 
-	if (webSearchRunIds.get(session) !== runId) {
-		session.logger.info(
-			`[startWebSearchFlow] Web search response arrived for stale request, discarding`,
-		);
-		return;
-	}
-	if (lines) {
-		for (let i = 0; i < lines.length; i++) {
-			const line = lines[i];
-			if (webSearchRunIds.get(session) !== runId) return;
-			session.logger.info(`[startWebSearchFlow] Web search result: ${line}`);
-			session.layouts.showTextWall(`// Clairvoyant\nW: ${line}`, {
-				view: ViewType.MAIN,
-				durationMs: 3000,
-			});
-			if (i < lines.length - 1) {
-				await new Promise((resolve) => setTimeout(resolve, 3000));
-			}
-		}
-	} else {
-		session.logger.error(`[startWebSearchFlow] No lines in answerLines`);
-	}
+                if (webSearchRunIds.get(session) !== runId) {
+                        session.logger.info(
+                                `[startWebSearchFlow] Web search response arrived for stale request, discarding`,
+                        );
+                        return;
+                }
+
+                const lines = answerLines.results[0]?.lines;
+
+                if (lines?.length) {
+                        for (let i = 0; i < lines.length; i++) {
+                                const line = lines[i];
+                                if (webSearchRunIds.get(session) !== runId) return;
+                                session.logger.info(
+                                        `[startWebSearchFlow] Web search result: ${line}`,
+                                );
+                                session.layouts.showTextWall(`// Clairvoyant\nW: ${line}`, {
+                                        view: ViewType.MAIN,
+                                        durationMs: 3000,
+                                });
+                                if (i < lines.length - 1) {
+                                        await new Promise((resolve) => setTimeout(resolve, 3000));
+                                }
+                        }
+                } else {
+                        session.logger.error(`[startWebSearchFlow] No lines in answerLines`);
+                }
+        } catch (error) {
+                session.logger.error(
+                        `[startWebSearchFlow] Web search flow error: ${String(error)}`,
+                );
+
+                if (webSearchRunIds.get(session) === runId) {
+                        session.layouts.showTextWall(
+                                "// Clairvoyant\nW: Couldn't search the web.",
+                                {
+                                        view: ViewType.MAIN,
+                                        durationMs: 3000,
+                                },
+                        );
+                }
+        }
 }
