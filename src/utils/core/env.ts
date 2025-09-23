@@ -4,7 +4,7 @@ import { z } from "zod";
 export const env = createEnv({
 	server: {
 		PACKAGE_NAME: z.string(),
-		PORT: z.number(),
+		PORT: z.string(),
 		MENTRAOS_API_KEY: z.string(),
 		GROQ_API_KEY: z.string(),
 		OPENAI_API_KEY: z.string(),
