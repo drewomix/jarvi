@@ -4,13 +4,20 @@ import { mapSearchSchema } from "../types/schema";
 
 type MapSearchResult = z.infer<typeof mapSearchSchema>;
 
+export interface PlaceSuggestion {
+	id: string;
+	name: string;
+	address: string;
+	snippet?: string;
+}
+
 export async function getPlaces(
 	query: string,
 	location: {
 		latitude: number;
 		longitude: number;
 	},
-): Promise<MapSearchResult[]> {
+): Promise<PlaceSuggestion[]> {
 	const response = await fetch(
 		"https://places.googleapis.com/v1/places:searchText",
 		{
@@ -59,5 +66,10 @@ export async function getPlaces(
 			}
 		}) || [];
 
-	return validatedPlaces;
+	return validatedPlaces.map((place: MapSearchResult): PlaceSuggestion => ({
+		id: place.id,
+		name: place.displayName.text,
+		address: place.shortFormattedAddress,
+		snippet: place.reviewSummary?.text?.text,
+	}));
 }
