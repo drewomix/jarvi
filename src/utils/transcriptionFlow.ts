@@ -3,6 +3,7 @@ import { type TranscriptionData, ViewType } from "@mentra/sdk";
 import { b, Router } from "./baml_client";
 import { startWebSearchFlow } from "./handlers/search";
 import { startWeatherFlow } from "./handlers/weather";
+import { startMapsFlow } from "./handlers/maps";
 
 export async function handleTranscription(
 	data: TranscriptionData,
@@ -16,8 +17,13 @@ export async function handleTranscription(
 	}
 	switch (routing.routing) {
 		case Router.WEATHER:
-			session.logger.info(`[Clairvoyant] Weather route: starting async flow`);
-			void startWeatherFlow(session);
+		session.logger.info(`[Clairvoyant] Weather route: starting async flow`);
+		void startWeatherFlow(session);
+		return;
+
+		case Router.MAPS:
+			session.logger.info(`[Clairvoyant] Maps route: starting async flow`);
+			void startMapsFlow(data.text, session);
 			return;
 
 		case Router.WEB_SEARCH:

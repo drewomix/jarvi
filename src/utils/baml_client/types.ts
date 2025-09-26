@@ -50,6 +50,7 @@ export function get_checks<CheckName extends string>(checks: Record<CheckName, C
 export enum Router {
   WEATHER = "WEATHER",
   WEB_SEARCH = "WEB_SEARCH",
+  MAPS = "MAPS",
   LLM_CALL = "LLM_CALL",
 }
 
@@ -110,6 +111,19 @@ export interface LocationLite {
 export interface NewsItem {
   title: string
   content: string
+  
+}
+
+export interface PlaceLines {
+  lines: string[]
+  
+}
+
+export interface PlaceSuggestion {
+  id: string
+  name: string
+  address: string
+  snippet?: string | null
   
 }
 

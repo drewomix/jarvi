@@ -41,6 +41,10 @@ export default class TypeBuilder {
     
     NewsItem: ClassViewer<'NewsItem', "title" | "content">;
     
+    PlaceLines: ClassViewer<'PlaceLines', "lines">;
+    
+    PlaceSuggestion: ClassViewer<'PlaceSuggestion', "id" | "name" | "address" | "snippet">;
+    
     QueryResult: ClassViewer<'QueryResult', "query" | "results">;
     
     QuestionAnalysisResponse: ClassViewer<'QuestionAnalysisResponse', "original_text" | "has_question" | "question" | "answer">;
@@ -54,13 +58,13 @@ export default class TypeBuilder {
     WeatherLines: ClassViewer<'WeatherLines', "lines">;
     
     
-    Router: EnumViewer<'Router', "WEATHER" | "WEB_SEARCH" | "LLM_CALL">;
+    Router: EnumViewer<'Router', "WEATHER" | "WEB_SEARCH" | "MAPS" | "LLM_CALL">;
     
 
     constructor() {
         this.tb = new _TypeBuilder({
           classes: new Set([
-            "AlertLite","AnswerLines","CurrentLite","DailyForecastItem","FormattedWeather","LocationLite","NewsItem","QueryResult","QuestionAnalysisResponse","RoutingBehavior","TempBlock","WeatherConditionLite","WeatherLines",
+            "AlertLite","AnswerLines","CurrentLite","DailyForecastItem","FormattedWeather","LocationLite","NewsItem","PlaceLines","PlaceSuggestion","QueryResult","QuestionAnalysisResponse","RoutingBehavior","TempBlock","WeatherConditionLite","WeatherLines",
           ]),
           enums: new Set([
             "Router",
@@ -96,6 +100,14 @@ export default class TypeBuilder {
           "title","content",
         ]);
         
+        this.PlaceLines = this.tb.classViewer("PlaceLines", [
+          "lines",
+        ]);
+        
+        this.PlaceSuggestion = this.tb.classViewer("PlaceSuggestion", [
+          "id","name","address","snippet",
+        ]);
+        
         this.QueryResult = this.tb.classViewer("QueryResult", [
           "query","results",
         ]);
@@ -122,7 +134,7 @@ export default class TypeBuilder {
         
         
         this.Router = this.tb.enumViewer("Router", [
-          "WEATHER","WEB_SEARCH","LLM_CALL",
+          "WEATHER","WEB_SEARCH","MAPS","LLM_CALL",
         ]);
         
     }
