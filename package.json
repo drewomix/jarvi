@@ -14,7 +14,7 @@
 		"build": "tsc",
 		"start": "bun run src/index.ts",
 		"dev": "bun --watch src/index.ts",
-		"test": "bun run baml-cli test"
+		"test": "bun run baml-cli test && bun test"
 	},
 	"peerDependencies": {
 		"typescript": "^5.8.3"

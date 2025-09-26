@@ -50,7 +50,7 @@ test test_maps {
 test test_llm_call {
     functions [Route]
     args {
-        text "Why is the UV index such an important metric to measure in NYC?"
+        text "What is the purpose of context engineering with respect to LLM's?"
     }
     @@assert( {{ this.routing == "LLM_CALL"}})
 }
