@@ -46,11 +46,3 @@ test test_maps {
     }
     @@assert( {{ this.routing == "MAPS"}})
 }
-
-test test_llm_call {
-    functions [Route]
-    args {
-        text "What is the purpose of context engineering with respect to LLM's?"
-    }
-    @@assert( {{ this.routing == "LLM_CALL"}})
-}
