@@ -46,9 +46,9 @@ export async function startMapsFlow(query: string, session: AppSession) {
 
 			const places = await showTextDuringOperation(
 				session,
-				"// Clairvoyant\nW: Finding nearby matches...",
-				"// Clairvoyant\nW: Found a few ideas!",
-				"// Clairvoyant\nW: Couldn't find anything nearby.",
+				"// Clairvoyant\nM: Finding nearby matches...",
+				"// Clairvoyant\nM: Found a few ideas!",
+				"// Clairvoyant\nM: Couldn't find anything nearby.",
 				() =>
 					getPlaces(query, {
 						latitude: location.lat,
@@ -81,9 +81,11 @@ export async function startMapsFlow(query: string, session: AppSession) {
 			const lines = placeLines.lines;
 
 			if (!lines?.length) {
-				session.logger.warn("[startMapsFlow] SummarizePlaces returned no lines");
+				session.logger.warn(
+					"[startMapsFlow] SummarizePlaces returned no lines",
+				);
 				session.layouts.showTextWall(
-					"// Clairvoyant\nW: Couldn't summarize those spots.",
+					"// Clairvoyant\nM: Couldn't summarize those spots.",
 					{
 						view: ViewType.MAIN,
 						durationMs: 3000,
@@ -97,7 +99,7 @@ export async function startMapsFlow(query: string, session: AppSession) {
 
 				const line = lines[i];
 				session.logger.info(`[startMapsFlow] Map result: ${line}`);
-				session.layouts.showTextWall(`// Clairvoyant\nW: ${line}`, {
+				session.layouts.showTextWall(`// Clairvoyant\nM: ${line}`, {
 					view: ViewType.MAIN,
 					durationMs: 3000,
 				});
@@ -108,9 +110,7 @@ export async function startMapsFlow(query: string, session: AppSession) {
 			}
 		} catch (error) {
 			statusWallActive = false;
-			session.logger.error(
-				`[startMapsFlow] Maps flow error: ${String(error)}`,
-			);
+			session.logger.error(`[startMapsFlow] Maps flow error: ${String(error)}`);
 
 			if (mapsRunIds.get(session) === runId) {
 				session.layouts.showTextWall(
@@ -130,7 +130,9 @@ export async function startMapsFlow(query: string, session: AppSession) {
 		if (mapsRunIds.get(session) !== runId) return;
 		if (locationReceived) return;
 
-		session.logger.warn(`[startMapsFlow] Location timeout after ${TIMEOUT_MS}ms`);
+		session.logger.warn(
+			`[startMapsFlow] Location timeout after ${TIMEOUT_MS}ms`,
+		);
 
 		unsubscribe?.();
 
@@ -142,7 +144,7 @@ export async function startMapsFlow(query: string, session: AppSession) {
 		}
 
 		session.layouts.showTextWall(
-			"// Clairvoyant\nW: Still waiting on your location…",
+			"// Clairvoyant\nM: Still waiting on your location…",
 			{
 				view: ViewType.MAIN,
 				durationMs: 2000,
@@ -154,7 +156,7 @@ export async function startMapsFlow(query: string, session: AppSession) {
 			if (locationReceived) return;
 
 			session.layouts.showTextWall(
-				"// Clairvoyant\nW: Couldn't get your location.",
+				"// Clairvoyant\nM: Couldn't get your location.",
 				{
 					view: ViewType.MAIN,
 					durationMs: 2000,
