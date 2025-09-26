@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { env } from "../src/utils/core/env";
 
 const samplePayload = {
 	places: [
@@ -27,13 +28,27 @@ const samplePayload = {
 
 describe("Maps API Integration", () => {
 	test("getPlaces formats Google Places results", async () => {
+		// Initialize environment variables through env.ts
 		process.env.GOOGLE_MAPS_API_KEY ??= "test-key";
+		process.env.PACKAGE_NAME ??= "test-package";
+		process.env.PORT ??= "3000";
+		process.env.MENTRAOS_API_KEY ??= "test-mentra-key";
+		process.env.GROQ_API_KEY ??= "test-groq-key";
+		process.env.OPENAI_API_KEY ??= "test-openai-key";
+		process.env.OPENWEATHERMAP_API_KEY ??= "test-weather-key";
+		process.env.TAVILY_API_KEY ??= "test-tavily-key";
+
+		// Ensure env is initialized
+		env;
 		const originalFetch = globalThis.fetch;
-		globalThis.fetch = async () =>
-			new Response(JSON.stringify(samplePayload), {
-				status: 200,
-				headers: { "Content-Type": "application/json" },
-			});
+		globalThis.fetch = Object.assign(
+			async () =>
+				new Response(JSON.stringify(samplePayload), {
+					status: 200,
+					headers: { "Content-Type": "application/json" },
+				}),
+			{ preconnect: () => Promise.resolve() },
+		);
 
 		try {
 			const { getPlaces } = await import("../src/utils/tools/mapsCall");
@@ -61,17 +76,31 @@ describe("Maps API Integration", () => {
 	});
 
 	test("getPlaces throws on failed HTTP response", async () => {
+		// Initialize environment variables through env.ts
 		process.env.GOOGLE_MAPS_API_KEY ??= "test-key";
+		process.env.PACKAGE_NAME ??= "test-package";
+		process.env.PORT ??= "3000";
+		process.env.MENTRAOS_API_KEY ??= "test-mentra-key";
+		process.env.GROQ_API_KEY ??= "test-groq-key";
+		process.env.OPENAI_API_KEY ??= "test-openai-key";
+		process.env.OPENWEATHERMAP_API_KEY ??= "test-weather-key";
+		process.env.TAVILY_API_KEY ??= "test-tavily-key";
+
+		// Ensure env is initialized
+		env;
 		const originalFetch = globalThis.fetch;
-		globalThis.fetch = async () =>
-			new Response("Boom", {
-				status: 500,
-				statusText: "Internal Server Error",
-			});
+		globalThis.fetch = Object.assign(
+			async () =>
+				new Response("Boom", {
+					status: 500,
+					statusText: "Internal Server Error",
+				}),
+			{ preconnect: () => Promise.resolve() },
+		);
 
 		try {
 			const { getPlaces } = await import("../src/utils/tools/mapsCall");
-			await expect(
+			expect(
 				getPlaces("anything", { latitude: 0, longitude: 0 }),
 			).rejects.toThrow(/HTTP 500/);
 		} finally {
