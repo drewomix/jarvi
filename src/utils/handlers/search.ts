@@ -17,9 +17,9 @@ export async function startWebSearchFlow(query: string, session: AppSession) {
 	try {
 		const searchResults = await showTextDuringOperation(
 			session,
-			"// Clairvoyant\nW: Searching the web...",
-			"// Clairvoyant\nW: Found it!",
-			"// Clairvoyant\nW: Couldn't search the web.",
+			"// Clairvoyant\nS: Searching the web...",
+			"// Clairvoyant\nS: Found it!",
+			"// Clairvoyant\nS: Couldn't search the web.",
 			() => performWebSearch(query),
 		);
 
@@ -50,7 +50,7 @@ export async function startWebSearchFlow(query: string, session: AppSession) {
 				const line = lines[i];
 				if (webSearchRunIds.get(session) !== runId) return;
 				session.logger.info(`[startWebSearchFlow] Web search result: ${line}`);
-				session.layouts.showTextWall(`// Clairvoyant\nW: ${line}`, {
+				session.layouts.showTextWall(`// Clairvoyant\nS: ${line}`, {
 					view: ViewType.MAIN,
 					durationMs: 3000,
 				});
@@ -68,7 +68,7 @@ export async function startWebSearchFlow(query: string, session: AppSession) {
 
 		if (webSearchRunIds.get(session) === runId) {
 			session.layouts.showTextWall(
-				"// Clairvoyant\nW: Couldn't search the web.",
+				"// Clairvoyant\nS: Couldn't search the web.",
 				{
 					view: ViewType.MAIN,
 					durationMs: 3000,

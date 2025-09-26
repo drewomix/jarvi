@@ -10,7 +10,7 @@ export async function startMapsFlow(query: string, session: AppSession) {
 	const runId = Date.now();
 	mapsRunIds.set(session, runId);
 
-	session.layouts.showTextWall("// Clairvoyant\nW: Checking nearby spots...", {
+	session.layouts.showTextWall("// Clairvoyant\nM: Checking nearby spots...", {
 		view: ViewType.MAIN,
 		durationMs: 2000,
 	});
