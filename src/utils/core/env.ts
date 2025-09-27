@@ -11,6 +11,7 @@ export const env = createEnv({
 		OPENWEATHERMAP_API_KEY: z.string(),
 		TAVILY_API_KEY: z.string(),
 		GOOGLE_MAPS_API_KEY: z.string(),
+		HONCHO_API_KEY: z.string(),
 	},
 	runtimeEnv: process.env,
 });

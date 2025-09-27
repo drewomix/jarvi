@@ -1,33 +1,34 @@
 class QuestionAnalysisResponse {
-  original_text string @description("Echo of the user's input text verbatim")
-  has_question bool @description("Whether the text contains a question")
-  question string? @description("Concise summary of the user's question in 10 words or fewer")
-  answer string? @description("Direct answer in 20 words or fewer")
+    original_text string @description("Echo of the user's input text verbatim")
+    has_question bool @description("Whether the text contains a question")
+    question string? @description("Concise summary of the user's question in 10 words or fewer")
+    answer string[] @description("Direct answer in 20 words or fewer")
 }
 
+
 function AnswerQuestion(text: string) -> QuestionAnalysisResponse {
-  client "Groq"
-  prompt #"
-    You are an assistant that analyzes a user's message to determine if it contains a question.
-    Instructions:
-    - Set original_text to the user's input text verbatim.
-    - Set has_question to true only if a question is present; otherwise false.
-    - If has_question is true:
-      - question: return a concise, optionally personable summary of the user's question in 10 words or fewer.
-        Do not include prefixed phrases like 'You asked'.
-      - answer: provide a direct answer in 20 words or fewer.
-    - If no question is present, set question and answer to null.
-    - If the user's message appears to be referring to them speaking to another person then set has_question to false.
+    client "GroqHeavy"
+    prompt #"
+        {{ _.role("system") }}
+        You analyze a user's message to detect and answer questions.
+        Instructions:
+        - Set original_text to the user's input text verbatim.
+        - Set has_question to true only if a question is present; otherwise false.
+        - If has_question is true:
+          - question: concise (≤10 words) summary without prefixed phrases like 'You asked'.
+          - answer: direct answer in ≤50 words as an array of lines. Each item in the array cannot be more than 10 words.
+        - If no question is present, set question and answer to null.
+        - If the user is describing someone else's conversation, set has_question to false.
 
-    {{ _.role("user") }} {{ text }}
+        {{ ctx.output_format }}
 
-    {{ ctx.output_format }}
-  "#
+        {{ _.role("user") }} {{ text }}
+    "#
 }
 
 test test_answer_question {
-  functions [AnswerQuestion]
-  args {
-    text "What is the capital of France?"
-  }
+    functions [AnswerQuestion]
+    args {
+        text "What is the capital of France?"
+    }
 }

@@ -39,6 +39,8 @@ export default class TypeBuilder {
     
     LocationLite: ClassViewer<'LocationLite', "lat" | "lon" | "timezone">;
     
+    MemoryRecall: ClassViewer<'MemoryRecall', "query" | "results">;
+    
     NewsItem: ClassViewer<'NewsItem', "title" | "content">;
     
     PlaceLines: ClassViewer<'PlaceLines', "lines">;
@@ -58,13 +60,13 @@ export default class TypeBuilder {
     WeatherLines: ClassViewer<'WeatherLines', "lines">;
     
     
-    Router: EnumViewer<'Router', "WEATHER" | "WEB_SEARCH" | "MAPS" | "LLM_CALL">;
+    Router: EnumViewer<'Router', "WEATHER" | "WEB_SEARCH" | "MAPS" | "KNOWLEDGE" | "MEMORY_INSERTION" | "MEMORY_RECALL">;
     
 
     constructor() {
         this.tb = new _TypeBuilder({
           classes: new Set([
-            "AlertLite","AnswerLines","CurrentLite","DailyForecastItem","FormattedWeather","LocationLite","NewsItem","PlaceLines","PlaceSuggestion","QueryResult","QuestionAnalysisResponse","RoutingBehavior","TempBlock","WeatherConditionLite","WeatherLines",
+            "AlertLite","AnswerLines","CurrentLite","DailyForecastItem","FormattedWeather","LocationLite","MemoryRecall","NewsItem","PlaceLines","PlaceSuggestion","QueryResult","QuestionAnalysisResponse","RoutingBehavior","TempBlock","WeatherConditionLite","WeatherLines",
           ]),
           enums: new Set([
             "Router",
@@ -94,6 +96,10 @@ export default class TypeBuilder {
         
         this.LocationLite = this.tb.classViewer("LocationLite", [
           "lat","lon","timezone",
+        ]);
+        
+        this.MemoryRecall = this.tb.classViewer("MemoryRecall", [
+          "query","results",
         ]);
         
         this.NewsItem = this.tb.classViewer("NewsItem", [
@@ -134,7 +140,7 @@ export default class TypeBuilder {
         
         
         this.Router = this.tb.enumViewer("Router", [
-          "WEATHER","WEB_SEARCH","MAPS","LLM_CALL",
+          "WEATHER","WEB_SEARCH","MAPS","KNOWLEDGE","MEMORY_INSERTION","MEMORY_RECALL",
         ]);
         
     }

@@ -51,7 +51,9 @@ export enum Router {
   WEATHER = "WEATHER",
   WEB_SEARCH = "WEB_SEARCH",
   MAPS = "MAPS",
-  LLM_CALL = "LLM_CALL",
+  KNOWLEDGE = "KNOWLEDGE",
+  MEMORY_INSERTION = "MEMORY_INSERTION",
+  MEMORY_RECALL = "MEMORY_RECALL",
 }
 
 export interface AlertLite {
@@ -108,6 +110,12 @@ export interface LocationLite {
   
 }
 
+export interface MemoryRecall {
+  query: string
+  results: AnswerLines[]
+  
+}
+
 export interface NewsItem {
   title: string
   content: string
@@ -137,7 +145,7 @@ export interface QuestionAnalysisResponse {
   original_text: string
   has_question: boolean
   question?: string | null
-  answer?: string | null
+  answer: string[]
   
 }
 

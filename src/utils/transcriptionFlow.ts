@@ -1,13 +1,17 @@
-import type { AppSession } from "@mentra/sdk";
-import { type TranscriptionData, ViewType } from "@mentra/sdk";
+import type { Peer, Session } from "@honcho-ai/sdk";
+import type { AppSession, TranscriptionData } from "@mentra/sdk";
 import { b, Router } from "./baml_client";
+import { startKnowledgeFlow } from "./handlers/knowledge";
+import { startMapsFlow } from "./handlers/maps";
+import { MemoryCapture, MemoryRecall } from "./handlers/memory";
 import { startWebSearchFlow } from "./handlers/search";
 import { startWeatherFlow } from "./handlers/weather";
-import { startMapsFlow } from "./handlers/maps";
 
 export async function handleTranscription(
 	data: TranscriptionData,
 	session: AppSession,
+	memorySession: Session,
+	peers: Peer[],
 ) {
 	session.logger.info(`[Clairvoyant] Transcription: ${data.text}`);
 	const routing = await b.Route(data.text);
@@ -17,9 +21,9 @@ export async function handleTranscription(
 	}
 	switch (routing.routing) {
 		case Router.WEATHER:
-		session.logger.info(`[Clairvoyant] Weather route: starting async flow`);
-		void startWeatherFlow(session);
-		return;
+			session.logger.info(`[Clairvoyant] Weather route: starting async flow`);
+			void startWeatherFlow(session);
+			return;
 
 		case Router.MAPS:
 			session.logger.info(`[Clairvoyant] Maps route: starting async flow`);
@@ -33,21 +37,31 @@ export async function handleTranscription(
 			void startWebSearchFlow(data.text, session);
 			return;
 
+		case Router.KNOWLEDGE:
+			session.logger.info(`[Clairvoyant] Routing: Starting knowledge flow`);
+			void startKnowledgeFlow(data.text, session);
+			return;
+
+		case Router.MEMORY_RECALL:
+			session.logger.info(
+				`[Clairvoyant] Memory Recall route: starting async flow`,
+			);
+			void MemoryRecall(data.text, session, peers);
+			return;
+
+		case Router.MEMORY_INSERTION:
+			session.logger.info(
+				`[Clairvoyant] Memory Insertion route: starting async flow`,
+			);
+			void MemoryCapture(data.text, session, memorySession, peers);
+			return;
+
 		default: {
-			session.logger.info(`[Clairvoyant] Routing: Answering the question`);
-			const response = await b.AnswerQuestion(data.text);
-			if (response.has_question) {
-				session.layouts.showTextWall(
-					`${response.has_question ? `// Clairvoyant\nQ: ${response.question}` : ""}${response.answer ? `\nA: ${response.answer}` : ""}`,
-					{ view: ViewType.MAIN, durationMs: 10000 },
-				);
-			} else {
-				session.layouts.showTextWall(``, {
-					view: ViewType.MAIN,
-					durationMs: 2000,
-				});
-			}
-			return response;
+			session.logger.info(
+				`[Clairvoyant] Memory Insertion route: starting async flow`,
+			);
+			void MemoryCapture(data.text, session, memorySession, peers);
+			return;
 		}
 	}
 }
