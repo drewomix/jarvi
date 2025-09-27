@@ -1,5 +1,6 @@
 import { AppServer, type AppSession } from "@mentra/sdk";
 import { RateLimiter } from "./utils/core/rateLimiting";
+import { initializeMemory } from "./utils/tools/memoryCall";
 import { handleTranscription } from "./utils/transcriptionFlow";
 
 const PACKAGE_NAME =
@@ -28,6 +29,8 @@ class Clairvoyant extends AppServer {
 	}
 
 	protected override async onSession(session: AppSession): Promise<void> {
+		const [memorySession, peers] = await initializeMemory();
+
 		session.events.onTranscription(async (data) => {
 			// If its not a final utterance, skip
 			if (!data.isFinal) return;
@@ -45,7 +48,7 @@ class Clairvoyant extends AppServer {
 			}
 
 			// Handle the transcription
-			await handleTranscription(data, session);
+			await handleTranscription(data, session, memorySession, peers);
 		});
 	}
 }

@@ -83,6 +83,9 @@ export async function startWeatherFlow(session: AppSession) {
 					await new Promise((resolve) => setTimeout(resolve, 3000));
 				}
 			}
+
+			// TODO: Add a BAML to check if the weather is inclement and if so and if so, ask the user if they're appropriately dressed for the weather.
+			// TODO: Add a memory call to intercept the users' answer and add it to the memory.
 		} catch (err) {
 			weatherTextWallShown = false;
 			session.logger.error(`[Clairvoyant] Weather flow error: ${String(err)}`);

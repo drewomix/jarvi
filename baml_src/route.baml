@@ -1,8 +1,10 @@
 enum Router {
-    WEATHER
-    WEB_SEARCH
-    MAPS
-    LLM_CALL
+    WEATHER @description("Current or upcoming weather questions for a specific place.")
+    WEB_SEARCH @description("News, current events, facts that change over time such as political events, or topics not obviously location-based.")
+    MAPS @description("Finding nearby businesses, restaurants, addresses, or directions.")
+    KNOWLEDGE @description("General knowledge that does not fit into other categories.")
+    MEMORY_INSERTION @description("Facts and statements that should be added to the user's memory.")
+    MEMORY_RECALL @description("Questions about the user's memory and personal history, personal preferences, personal opinions, goals, information about the user, or anything that is not a fact.")
 }
 
 class RoutingBehavior {
@@ -14,10 +16,6 @@ function Route(text: string) -> RoutingBehavior {
     client "GroqHeavy"
     prompt #"
         You are a routing assistant. Pick the best router for the user's request.
-        - WEATHER: current or upcoming weather questions for a specific place.
-        - WEB_SEARCH: general knowledge, news, or research not obviously location-based.
-        - MAPS: finding nearby businesses, restaurants, addresses, or directions.
-        - LLM_CALL: everything else or ambiguous queries.
         {{ _.role("user") }} {{ text }}
         {{ ctx.output_format }}
     "#
@@ -45,4 +43,44 @@ test test_maps {
         text "Find me a ramen restaurant near Union Square."
     }
     @@assert( {{ this.routing == "MAPS"}})
+}
+
+test test_knowledge {
+    functions [Route]
+    args {
+        text "What is the capital of France?"
+    }
+    @@assert( {{ this.routing == "KNOWLEDGE"}})
+}
+
+test test_knowledge_2 {
+    functions [Route]
+    args {
+        text "What is the purpose of mitochondria?"
+    }
+    @@assert( {{ this.routing == "KNOWLEDGE"}})
+}
+
+test test_memory {
+    functions [Route]
+    args {
+        text "What is my name?"
+    }
+    @@assert( {{ this.routing == "MEMORY_RECALL"}})
+}
+
+test test_memory_2 {
+    functions [Route]
+    args {
+        text "Koyal, what did I eat yesterday?"
+    }
+    @@assert( {{ this.routing == "MEMORY_RECALL"}})
+}
+
+test test_memory_3 {
+    functions [Route]
+    args {
+        text "Hey so I was just thinking about that time I went to the beach with my friends, we had a lot of fun!"
+    }
+    @@assert( {{ this.routing == "MEMORY_INSERTION"}})
 }

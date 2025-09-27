@@ -34,3 +34,4 @@ jobs:
         PACKAGE_NAME: ${{ secrets.PACKAGE_NAME }}
         PORT: ${{ secrets.PORT }}
         MENTRAOS_API_KEY: ${{ secrets.MENTRAOS_API_KEY }}
+        HONCHO_API_KEY: ${{ secrets.HONCHO_API_KEY }}
