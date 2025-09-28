@@ -34,4 +34,4 @@ Any violation of the conditions of this License automatically terminates your ri
 - ✅ You can modify and share non-commercially.  
 - ❌ Commercial use (selling, monetizing, including in paid services) requires a separate license.  
 
-For commercial licensing inquiries, contact: [your email/contact info]
+For commercial licensing inquiries, contact: [bhargava.ajay@gmail.com]
