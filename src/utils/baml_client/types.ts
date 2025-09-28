@@ -111,7 +111,7 @@ export interface LocationLite {
 
 export interface MemoryRecall {
   query: string
-  results: AnswerLines[]
+  results: AnswerLines
   
 }
 

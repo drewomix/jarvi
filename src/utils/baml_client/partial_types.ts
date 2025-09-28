@@ -80,7 +80,7 @@ export namespace partial_types {
     }
     export interface MemoryRecall {
       query?: string | null
-      results: AnswerLines[]
+      results?: AnswerLines | null
     }
     export interface NewsItem {
       title?: string | null

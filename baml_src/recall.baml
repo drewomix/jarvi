@@ -1,6 +1,6 @@
 class MemoryRecall {
     query string
-    results AnswerLines[]
+    results AnswerLines
 }
 
 function MemoryQueryRecall(query: string, context: string) -> MemoryRecall {
