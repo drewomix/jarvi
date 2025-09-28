@@ -1,4 +1,4 @@
-# Clairvoyant
+# 🔮 Clairvoyant
 
 A real-time voice transcription and intelligent context-aware assistant built with MentraOS that captures audio, processes it through intelligent routing, and provides personalized responses using multiple AI tools and persistent memory.
 
