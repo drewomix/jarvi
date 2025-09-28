@@ -56,12 +56,9 @@ export async function MemoryRecall(
 		const diatribePeer = peers.find((peer) => peer.id === "diatribe");
 		if (diatribePeer) {
 			const response = await diatribePeer.chat(textQuery);
-			session.logger.info(
-				`[startMemoryRecallFlow] Memory recall response: ${response}`,
-			);
 			if (response) {
 				const answerLines = await b.MemoryQueryRecall(textQuery, response);
-				const lines = answerLines.results[0]?.lines;
+				const lines = answerLines.results;
 				if (lines?.length) {
 					for (let i = 0; i < lines.length; i++) {
 						const line = lines[i];
