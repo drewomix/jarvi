@@ -27,19 +27,19 @@ export async function handleTranscription(
 
 		case Router.MAPS:
 			session.logger.info(`[Clairvoyant] Maps route: starting async flow`);
-			void startMapsFlow(data.text, session);
+			void startMapsFlow(data.text, session, memorySession, peers);
 			return;
 
 		case Router.WEB_SEARCH:
 			session.logger.info(
 				`[Clairvoyant] Web search route: starting async flow`,
 			);
-			void startWebSearchFlow(data.text, session);
+			void startWebSearchFlow(data.text, session, memorySession, peers);
 			return;
 
 		case Router.KNOWLEDGE:
 			session.logger.info(`[Clairvoyant] Routing: Starting knowledge flow`);
-			void startKnowledgeFlow(data.text, session);
+			void startKnowledgeFlow(data.text, session, memorySession, peers);
 			return;
 
 		case Router.MEMORY_RECALL:
@@ -47,13 +47,6 @@ export async function handleTranscription(
 				`[Clairvoyant] Memory Recall route: starting async flow`,
 			);
 			void MemoryRecall(data.text, session, peers);
-			return;
-
-		case Router.MEMORY_INSERTION:
-			session.logger.info(
-				`[Clairvoyant] Memory Insertion route: starting async flow`,
-			);
-			void MemoryCapture(data.text, session, memorySession, peers);
 			return;
 
 		default: {

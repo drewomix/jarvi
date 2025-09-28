@@ -1,12 +1,19 @@
+import type { Peer, Session } from "@honcho-ai/sdk";
 import type { AppSession } from "@mentra/sdk";
 import { ViewType } from "@mentra/sdk";
 import { b } from "../baml_client";
 import { showTextDuringOperation } from "../core/textWall";
 import { getPlaces } from "../tools/mapsCall";
+import { MemoryCapture } from "./memory";
 
 const mapsRunIds = new WeakMap<AppSession, number>();
 
-export async function startMapsFlow(query: string, session: AppSession) {
+export async function startMapsFlow(
+	query: string,
+	session: AppSession,
+	memorySession: Session,
+	peers: Peer[],
+) {
 	const runId = Date.now();
 	mapsRunIds.set(session, runId);
 
@@ -55,6 +62,8 @@ export async function startMapsFlow(query: string, session: AppSession) {
 						longitude: location.lng,
 					}),
 			);
+
+			await MemoryCapture(query, session, memorySession, peers);
 
 			statusWallActive = false;
 

@@ -3,7 +3,6 @@ enum Router {
     WEB_SEARCH @description("News, current events, facts that change over time such as political events, or topics not obviously location-based.")
     MAPS @description("Finding nearby businesses, restaurants, addresses, or directions.")
     KNOWLEDGE @description("General knowledge that does not fit into other categories.")
-    MEMORY_INSERTION @description("Facts and statements that should be added to the user's memory.")
     MEMORY_RECALL @description("Questions about the user's memory and personal history, personal preferences, personal opinions, goals, information about the user, or anything that is not a fact.")
 }
 
@@ -75,12 +74,4 @@ test test_memory_2 {
         text "Koyal, what did I eat yesterday?"
     }
     @@assert( {{ this.routing == "MEMORY_RECALL"}})
-}
-
-test test_memory_3 {
-    functions [Route]
-    args {
-        text "Hey so I was just thinking about that time I went to the beach with my friends, we had a lot of fun!"
-    }
-    @@assert( {{ this.routing == "MEMORY_INSERTION"}})
 }

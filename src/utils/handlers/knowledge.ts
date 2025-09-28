@@ -1,12 +1,18 @@
+import type { Peer, Session } from "@honcho-ai/sdk";
 import type { AppSession } from "@mentra/sdk";
 import { ViewType } from "@mentra/sdk";
-
 import { b } from "../baml_client";
 import { showTextDuringOperation } from "../core/textWall";
+import { MemoryCapture } from "./memory";
 
 const knowledgeRunIds = new WeakMap<AppSession, number>();
 
-export async function startKnowledgeFlow(query: string, session: AppSession) {
+export async function startKnowledgeFlow(
+	query: string,
+	session: AppSession,
+	memorySession: Session,
+	peers: Peer[],
+) {
 	const runId = Date.now();
 	knowledgeRunIds.set(session, runId);
 
@@ -18,11 +24,13 @@ export async function startKnowledgeFlow(query: string, session: AppSession) {
 		const response = await showTextDuringOperation(
 			session,
 			"// Clairvoyant\nK: Thinking it through...",
-			"// Clairvoyant\nK: Got it!",
+			"",
 			"// Clairvoyant\nK: Couldn't figure that out.",
 			() => b.AnswerQuestion(query),
 			{ view: ViewType.MAIN, clearDurationMs: 2000 },
 		);
+
+		await MemoryCapture(query, session, memorySession, peers);
 
 		if (knowledgeRunIds.get(session) !== runId) {
 			session.logger.info(
