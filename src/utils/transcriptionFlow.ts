@@ -46,7 +46,7 @@ export async function handleTranscription(
 			session.logger.info(
 				`[Clairvoyant] Memory Recall route: starting async flow`,
 			);
-			void MemoryRecall(data.text, session, peers);
+			void MemoryRecall(data.text, session, memorySession, peers);
 			return;
 
 		default: {

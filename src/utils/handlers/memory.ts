@@ -45,6 +45,7 @@ export async function MemoryCapture(
 export async function MemoryRecall(
 	textQuery: string,
 	session: AppSession,
+	memorySession: Session,
 	peers: Peer[],
 ) {
 	const runId = Date.now();
@@ -55,6 +56,18 @@ export async function MemoryRecall(
 	try {
 		const diatribePeer = peers.find((peer) => peer.id === "diatribe");
 		if (diatribePeer) {
+			// Capture the query as a memory first
+			await memorySession.addMessages([
+				{
+					peer_id: diatribePeer.id,
+					content: textQuery,
+					metadata: {
+						timestamp: new Date().toISOString(),
+						source: "memoryRecall",
+					},
+				},
+			]);
+
 			const response = await diatribePeer.chat(textQuery);
 			if (response) {
 				const memoryRecall = await b.MemoryQueryRecall(textQuery, response);
