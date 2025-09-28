@@ -1,74 +1,154 @@
 # Clairvoyant
 
-A real-time voice transcription and intelligent Q&A application built with MentraOS that captures audio, processes it through Voice Activity Detection (VAD), transcribes speech using Groq's Whisper API, and provides intelligent answers to detected questions using OpenAI's GPT-4o.
+A real-time voice transcription and intelligent context-aware assistant built with MentraOS that captures audio, processes it through intelligent routing, and provides personalized responses using multiple AI tools and persistent memory.
 
 ## Overview
 
-Clairvoyant is an advanced MentraOS application that provides real-time voice transcription with intelligent question detection and answering capabilities. It listens for voice activity, records audio chunks during speech, automatically transcribes the audio when the user stops speaking using Groq's Whisper large-v3 model, and then analyzes the transcription to detect questions and provide concise answers using OpenAI's GPT-4o model.
+Clairvoyant is an advanced MentraOS application that provides real-time voice transcription with intelligent routing to specialized AI capabilities. It listens for voice activity, transcribes speech using Groq's Whisper, routes queries to appropriate tools (weather, search, maps, memory, etc.), and provides concise, contextual responses through AI-powered formatting and persistent memory integration.
 
 ## Architecture
 
-The application integrates four main components:
-- **MentraOS**: Provides the application framework, audio streaming, and voice activity detection
-- **Audio Processing**: Handles PCM to WAV conversion and audio buffer management  
-- **Groq Whisper API**: Performs speech-to-text transcription
-- **OpenAI GPT-4o**: Analyzes transcriptions for question detection and provides intelligent answers
+The application integrates six main layers:
+- **MentraOS Framework**: Provides audio streaming, voice activity detection, and UI components
+- **Intelligent Routing**: BAML-powered routing system that directs queries to appropriate handlers
+- **Specialized Tools**: External API integrations (weather, search, maps, memory)
+- **Handler Orchestration**: UX flow management with loading states and response formatting
+- **AI Formatting**: BAML prompts that convert tool outputs to concise, readable responses
+- **Persistent Memory**: Honcho-powered context and personalization system
 
-## How It Works
+## System Flow
 
 ```mermaid
 sequenceDiagram
     participant User
     participant MentraOS
     participant Clairvoyant
-    participant AudioProcessor
-    participant Groq
-    participant OpenAI
-    participant FileSystem
+    participant Router
+    participant Handler
+    participant Tool
+    participant BAML
+    participant Memory
+    participant ExtAPI as External APIs
 
     User->>MentraOS: Starts speaking
-    MentraOS->>Clairvoyant: onVoiceActivity(status: true)
-    
-    loop While speaking
-        MentraOS->>Clairvoyant: onAudioChunk(data)
-        Clairvoyant->>AudioProcessor: Store Int16Array chunk
-        Note over Clairvoyant: audioBuffers.push(new Int16Array(data.arrayBuffer))
-    end
+    MentraOS->>Clairvoyant: onVoiceActivity + onAudioChunk
     
     User->>MentraOS: Stops speaking  
-    MentraOS->>Clairvoyant: onVoiceActivity(status: false)
+    MentraOS->>Clairvoyant: onVoiceActivity(false)
     
-    Clairvoyant->>AudioProcessor: concatInt16Arrays(audioBuffers)
-    AudioProcessor->>AudioProcessor: pcmInt16ToWavBuffer()
-    AudioProcessor-->>Clairvoyant: WAV Buffer
+    Clairvoyant->>Clairvoyant: Process audio & transcribe via Groq Whisper
+    Clairvoyant->>Router: Route transcription via BAML
+    Router-->>Clairvoyant: Routing decision (WEATHER/SEARCH/MAPS/MEMORY_RECALL/etc)
     
-    Clairvoyant->>FileSystem: writeFileSync(temp WAV file)
-    Clairvoyant->>Groq: audio.translations.create()
-    Note over Groq: Whisper large-v3 model
-    Groq-->>Clairvoyant: Transcription text
-    
-    Clairvoyant->>FileSystem: unlinkSync(temp file)
-    Clairvoyant->>OpenAI: chat.completions.create()
-    Note over OpenAI: GPT-4o question detection & answering
-    OpenAI-->>Clairvoyant: JSON response with question analysis
-    
-    alt Question detected
-        Clairvoyant->>MentraOS: showReferenceCard(answer, 15s)
-        Note over MentraOS: Display intelligent answer
-    else No question detected
-        Clairvoyant->>MentraOS: logger.info(transcription only)
+    alt Specialized Route (e.g., WEATHER)
+        Clairvoyant->>Handler: startWeatherFlow()
+        Handler->>MentraOS: Show loading state
+        Handler->>MentraOS: Subscribe to location
+        MentraOS-->>Handler: Location data
+        Handler->>Tool: getWeatherData(lat, lon)
+        Tool->>ExtAPI: OpenWeatherMap API
+        ExtAPI-->>Tool: Weather data
+        Tool-->>Handler: Formatted weather response
+        Handler->>BAML: SummarizeWeatherFormatted()
+        BAML-->>Handler: Short readable lines
+        Handler->>MentraOS: Display formatted response
+        Handler->>Memory: Store interaction context
+    else Memory Recall Route
+        Clairvoyant->>Memory: MemoryRecall(query)
+        Memory->>Memory: Query Honcho peer
+        Memory->>BAML: Format retrieved context
+        Memory->>MentraOS: Display personalized response
+    else Default Route
+        Clairvoyant->>Memory: MemoryCapture(transcription)
+        Memory->>Memory: Store in Honcho session
     end
+```
+
+## Key Features
+
+### 🧠 Intelligent Routing System
+- **BAML-powered routing**: Automatically classifies queries into categories (weather, search, maps, memory, knowledge)
+- **Context-aware routing**: Routes questions about user's personal information to memory system
+- **Extensible routing**: Easy to add new categories and handlers
+
+### 🔧 Modular Tool Architecture
+- **Weather Tool**: OpenWeatherMap integration with location services
+- **Web Search Tool**: Tavily-powered real-time web search
+- **Maps Tool**: Google Places API for location queries
+- **Memory Tool**: Honcho-powered persistent context and personalization
+- **Knowledge Tool**: General knowledge questions via AI
+
+### 🎯 Handler-Based Flow Management
+- **Async flow orchestration**: Non-blocking handlers with stale request protection
+- **Loading state management**: User-friendly loading/success/error states
+- **Location integration**: Automatic location requests where needed
+- **Timeout handling**: Graceful fallbacks for slow/failed operations
+
+### 🤖 AI-Powered Response Formatting
+- **BAML prompt engineering**: Converts raw tool outputs to concise, readable responses
+- **Token-efficient prompts**: Minimal data transfer with maximum information density
+- **Consistent response format**: ≤3 lines, ≤10 words per line for optimal readability
+- **Contextual formatting**: Responses tailored to user's query and personality
+
+### 💾 Persistent Memory & Context
+- **Honcho integration**: Persistent memory across sessions
+- **Peer-based conversations**: Dedicated "diatribe" peer for raw transcription storage
+- **Personal context**: Remembers user preferences, history, and personal information
+- **Memory-aware responses**: Leverages stored context for personalized interactions
+
+### 🎨 Smart UI Integration
+- **Text wall displays**: Clean, timed text overlays in MentraOS interface
+- **View management**: Automatic return to main view after responses
+- **Duration optimization**: 3-second display timing for optimal readability
+- **Error state handling**: Clear error messaging with automatic recovery
+
+## Project Structure
+
+### Core Organization
+```
+src/
+├── index.ts                    # Main application entry point
+└── utils/
+    ├── transcriptionFlow.ts    # Central routing and transcription handler
+    ├── baml_client/            # Generated BAML client (auto-generated)
+    ├── core/                   # Core utilities
+    │   ├── env.ts              # Environment variable validation
+    │   ├── textWall.ts         # UI text display helpers
+    │   └── rateLimiting.ts     # API rate limiting utilities
+    ├── tools/                  # External API integrations
+    │   ├── weatherCall.ts      # OpenWeatherMap integration
+    │   ├── webSearch.ts        # Tavily web search integration
+    │   ├── mapsCall.ts         # Google Places integration
+    │   └── memoryCall.ts       # Honcho memory initialization
+    ├── handlers/               # Flow orchestrators
+    │   ├── weather.ts          # Weather query handler
+    │   ├── search.ts           # Web search handler
+    │   ├── maps.ts             # Location/maps handler
+    │   ├── memory.ts           # Memory capture/recall handler
+    │   └── knowledge.ts        # General knowledge handler
+    └── types/                  # TypeScript type definitions
+        └── schema.ts           # Zod validation schemas
+```
+
+### BAML Prompts & Routing
+```
+baml_src/
+├── route.baml          # Main routing logic and route definitions
+├── weather.baml        # Weather response formatting
+├── search.baml         # Web search result formatting  
+├── maps.baml           # Location/maps response formatting
+├── recall.baml         # Memory recall formatting
+├── answer.baml         # General knowledge formatting
+├── clients.baml        # AI client configurations
+└── generators.baml     # Code generation settings
 ```
 
 ## Setup Instructions
 
 ### Prerequisites
-
 - [Bun](https://bun.sh) runtime
 - [ngrok](https://ngrok.com) for tunneling
-- MentraOS API key
-- Groq API key
-- OpenAI API key
+- API keys for: MentraOS, Groq, OpenAI, OpenWeatherMap, Tavily, Google Maps, Honcho
 
 ### Installation
 
@@ -83,7 +163,16 @@ PACKAGE_NAME=your-package-name
 MENTRAOS_API_KEY=your-mentraos-api-key
 GROQ_API_KEY=your-groq-api-key
 OPENAI_API_KEY=your-openai-api-key
+OPENWEATHERMAP_API_KEY=your-weather-api-key
+TAVILY_API_KEY=your-tavily-api-key
+GOOGLE_MAPS_API_KEY=your-google-maps-api-key
+HONCHO_API_KEY=your-honcho-api-key
 PORT=3000
+```
+
+3. Generate BAML client:
+```bash
+npx baml-cli generate
 ```
 
 ### Running the Application
@@ -93,143 +182,140 @@ PORT=3000
 bun run index.ts
 ```
 
-2. Create a tunnel to expose your local server (required for MentraOS integration):
+2. Create a tunnel to expose your local server:
 ```bash
 ngrok http --url=hamster-select-anchovy.ngrok-free.app 3000
 ```
 
-## Key Features
+## Intelligent Routing System
 
-- **Real-time Voice Activity Detection**: Automatically starts/stops recording based on speech detection
-- **Audio Buffer Management**: Efficiently handles audio chunks and concatenation
-- **WAV Format Conversion**: Converts PCM Int16 audio data to WAV format for API compatibility
-- **Automatic Transcription**: Uses Groq's Whisper large-v3 model for high-quality speech-to-text
-- **Intelligent Question Detection**: Analyzes transcriptions using OpenAI GPT-4o to identify questions
-- **Automatic Answer Generation**: Provides concise answers (15 words or fewer) to detected questions
-- **Smart Response Display**: Shows answers in MentraOS reference cards with configurable duration (15 seconds default)
-- **Structured JSON Processing**: Uses OpenAI's JSON mode for reliable question analysis and response formatting
-- **Temporary File Management**: Safely creates and cleans up temporary audio files
-- **Real-time Status Updates**: Shows recording status and intelligent responses via MentraOS reference cards
+The application uses BAML-powered routing to intelligently direct user queries:
 
-## Technical Details
+### Route Categories
+- **WEATHER**: Current/upcoming weather for specific locations
+- **WEB_SEARCH**: News, current events, time-sensitive information
+- **MAPS**: Nearby businesses, addresses, directions
+- **KNOWLEDGE**: General factual information
+- **MEMORY_RECALL**: Personal information, preferences, history
 
-### Intelligent Processing Pipeline
-
-The application now includes a sophisticated AI processing pipeline:
-
-1. **Audio Capture**: Voice activity detection triggers audio recording
-2. **Transcription**: Groq Whisper converts speech to text
-3. **Question Analysis**: OpenAI GPT-4o analyzes the transcription using structured JSON output
-4. **Response Generation**: If a question is detected, GPT-4o provides a concise answer
-5. **Display Management**: Answers are displayed in reference cards with automatic timeout
-
-### Question Detection System
-
-The `cleanTranscription` function in `utils/chat.ts` implements intelligent question detection:
-
+### Routing Logic
 ```typescript
-interface QuestionAnalysisResponse {
-	original_text: string;
-	has_question: boolean;
-	question: string | null;
-	answer: string | null;
+// baml_src/route.baml
+enum Router {
+    WEATHER @description("Current or upcoming weather questions for a specific place.")
+    WEB_SEARCH @description("News, current events, facts that change over time.")
+    MAPS @description("Finding nearby businesses, restaurants, addresses, or directions.")
+    KNOWLEDGE @description("General knowledge that does not fit into other categories.")
+    MEMORY_RECALL @description("Questions about user's personal history, preferences, or information.")
 }
 ```
 
-Key features:
-- Uses OpenAI's JSON mode for reliable structured responses
-- Detects questions in natural speech patterns
-- Generates answers limited to 15 words or fewer for quick comprehension
-- Handles edge cases and provides fallback responses
-- Comprehensive error handling with logging
+## Memory & Context System
 
-### Smart Display System
+### Persistent Memory with Honcho
+- **Session Management**: Unique sessions per user interaction
+- **Peer-based Storage**: Dedicated "diatribe" peer stores all transcriptions
+- **Context Retrieval**: Intelligent context recall for personalized responses
+- **Memory Integration**: Automatic context storage for all interactions
 
-The application includes a sophisticated display management system:
+### Memory Flow
+1. **Capture**: All transcriptions stored in Honcho session
+2. **Recall**: Personal queries trigger memory retrieval
+3. **Context**: Retrieved context formatted via BAML for natural responses
+4. **Persistence**: Memory persists across application sessions
 
+## Tool Integration Pattern
+
+### Adding New Tools (Example: News Tool)
+
+1. **Create Tool** (`src/utils/tools/newsCall.ts`):
 ```typescript
-async function showReferenceCardWithTimeout(
-	session: AppSession,
-	title: string,
-	text: string,
-	options: { view?: ViewType; durationMs?: number } = {},
-)
+export async function getNewsData(query: string) {
+  // API integration
+  // Data validation
+  // Return formatted response
+}
 ```
 
-Features:
-- Configurable display duration (default 15 seconds for answers)
-- Automatic cleanup and return to main view
-- Support for different view types
-- Non-blocking asynchronous operation
+2. **Add BAML Route** (`baml_src/route.baml`):
+```baml
+enum Router {
+    // ... existing routes
+    NEWS @description("Recent news articles and current events.")
+}
+```
+
+3. **Create Handler** (`src/utils/handlers/news.ts`):
+```typescript
+export async function startNewsFlow(query: string, session: AppSession) {
+  // Use showTextDuringOperation for UX
+  // Call tool
+  // Format via BAML
+  // Display results
+}
+```
+
+4. **Wire Routing** (`src/utils/transcriptionFlow.ts`):
+```typescript
+case Router.NEWS:
+  void startNewsFlow(data.text, session);
+  return;
+```
+
+5. **Regenerate BAML**:
+```bash
+npx baml-cli generate
+```
+
+## Technical Implementation Details
 
 ### Audio Processing
-- Captures audio as PCM Int16Array chunks at 16kHz sample rate
-- Concatenates chunks during voice activity periods
-- Converts to WAV format using the `wavefile` library
-- Temporary files are automatically cleaned up after processing
+- **PCM to WAV conversion**: Handles audio format conversion for Groq API
+- **Voice Activity Detection**: MentraOS built-in VAD for start/stop triggers
+- **Buffer management**: Efficient audio chunk concatenation
+- **Temporary file handling**: Safe creation and cleanup of audio files
 
-### Voice Activity Detection
-- Uses MentraOS built-in VAD capabilities
-- Triggers recording start/stop based on speech detection
-- Handles edge cases for continuous speech and silence
+### AI Integration
+- **Groq Whisper**: High-quality speech-to-text transcription
+- **Multiple AI clients**: OpenAI GPT-4o, Groq models via BAML configuration
+- **Structured responses**: JSON mode for reliable AI output parsing
+- **Token optimization**: Minimal data transfer with maximum information density
 
-## Implementation Observations
-
-- The audio processing continues after the user stops speaking. Can be tested as follows: 
-
-```typescript
-session.events.onAudioChunk((data) => {
-			if (isSpeaking) {
-				audioBuffers.push(new Int16Array(data.arrayBuffer));
-				session.logger.info(
-					`[Clairvoyant] AudioBuffer Size: ${audioBuffers.length}`,
-				);
-			}
-		});
-```
-
-- A `.wav` file needs to be saved to then be sent to the Groq API. 
-
-```typescript
-async function sendAudioToGroq(
-	session: AppSession,
-	audioBuffers: Int16Array[],
-	sampleRate = 16000,
-) {
-	const fullBuffer = concatInt16Arrays(audioBuffers);
-	const wavBuffer = pcmInt16ToWavBuffer(fullBuffer, sampleRate);
-	session.logger.info(`[Clairvoyant] WAV Buffer Size: ${wavBuffer.length}`);
-
-	const filePath = writeTempWavFile(wavBuffer);
-
-	try {
-		const translation = await groq.audio.translations.create({
-			file: fs.createReadStream(filePath),
-			model: "whisper-large-v3",
-		});
-		session.logger.info(translation.text);
-		const answer = await cleanTranscription(session, translation.text);
-		return answer;
-	} finally {
-		deleteFileSafe(filePath, session.logger);
-	}
-}
-```
-
-### API Integration
-- Integrates with Groq's Whisper API for transcription
-- Uses OpenAI GPT-4o for intelligent question detection and answering
-- Implements structured JSON responses for reliable AI processing
-- Uses streaming file upload for efficient processing
-- Implements proper error handling and cleanup for both APIs
+### Error Handling & Robustness
+- **Stale request protection**: WeakMap-based runId tracking prevents outdated responses
+- **Timeout handling**: Graceful fallbacks for location services and API calls
+- **Error state management**: User-friendly error messages with automatic recovery
+- **Rate limiting**: Built-in API rate limiting to prevent quota exhaustion
 
 ## Dependencies
 
+### Core Framework
 - `@mentra/sdk`: MentraOS application framework
+- `@honcho-ai/sdk`: Persistent memory and context management
+
+### AI & Processing
 - `groq-sdk`: Groq API client for Whisper transcription
-- `openai`: OpenAI API client for intelligent question processing
+- `openai`: OpenAI API client for intelligent processing
+- `baml`: AI prompt engineering and routing framework
+
+### External APIs
 - `wavefile`: Audio format conversion utilities
-- Standard Node.js modules: `fs`, `path`
+- Standard Node.js modules: `fs`, `path`, `crypto`
+
+### Development
+- `bun`: JavaScript runtime and package manager
+- TypeScript for type safety
+- Zod for runtime validation
+
+## Contributing
+
+When adding new tools or features:
+
+1. Follow the established tool/handler pattern
+2. Add appropriate BAML prompts and routing
+3. Include proper error handling and UX states
+4. Test routing logic with BAML test cases
+5. Regenerate BAML client after changes
+6. Update this README if adding new capabilities
 
 This project was created using `bun init` in bun v1.2.12.
-
