@@ -1,17 +1,17 @@
-import type { Peer, Session } from "@honcho-ai/sdk";
 import type { AppSession } from "@mentra/sdk";
 import { ViewType } from "@mentra/sdk";
 import { b } from "../baml_client";
 import { showTextDuringOperation } from "../core/textWall";
+import type { MemoryPeer, MemorySession } from "../tools/memoryCall";
 import { MemoryCapture } from "./memory";
 
 const knowledgeRunIds = new WeakMap<AppSession, number>();
 
 export async function startKnowledgeFlow(
-	query: string,
-	session: AppSession,
-	memorySession: Session,
-	peers: Peer[],
+        query: string,
+        session: AppSession,
+        memorySession: MemorySession,
+        peers: MemoryPeer[],
 ) {
 	const runId = Date.now();
 	knowledgeRunIds.set(session, runId);

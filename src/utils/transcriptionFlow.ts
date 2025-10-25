@@ -1,4 +1,3 @@
-import type { Peer, Session } from "@honcho-ai/sdk";
 import type { AppSession, TranscriptionData } from "@mentra/sdk";
 import { b, Router } from "./baml_client";
 import { startKnowledgeFlow } from "./handlers/knowledge";
@@ -6,12 +5,13 @@ import { startMapsFlow } from "./handlers/maps";
 import { MemoryCapture, MemoryRecall } from "./handlers/memory";
 import { startWebSearchFlow } from "./handlers/search";
 import { startWeatherFlow } from "./handlers/weather";
+import type { MemoryPeer, MemorySession } from "./tools/memoryCall";
 
 export async function handleTranscription(
-	data: TranscriptionData,
-	session: AppSession,
-	memorySession: Session,
-	peers: Peer[],
+        data: TranscriptionData,
+        session: AppSession,
+        memorySession: MemorySession,
+        peers: MemoryPeer[],
 ) {
 	session.logger.info(`[Clairvoyant] Transcription: ${data.text}`);
 	const routing = await b.Route(data.text);
