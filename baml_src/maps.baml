@@ -10,7 +10,7 @@ class PlaceLines {
 }
 
 function SummarizePlaces(query: string, places: PlaceSuggestion[]) -> PlaceLines {
-  client "Groq"
+  client "LMStudio"
   prompt #"
     {{ _.role("system")}}
     You respond like a concise local guide. Use friendly tone and no emojis.

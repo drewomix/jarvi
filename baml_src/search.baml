@@ -13,7 +13,7 @@ class QueryResult {
 }
 
 function AnswerSearch(query: string, searchResults: NewsItem[]) -> QueryResult {
-    client "Groq"
+    client "LMStudio"
     prompt #"
         {{ _.role("system")}}
         You are a helpful Web Search Summarizer who summarizes the results of a web search. 

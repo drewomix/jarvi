@@ -7,7 +7,7 @@ class QuestionAnalysisResponse {
 
 
 function AnswerQuestion(text: string) -> QuestionAnalysisResponse {
-    client "GroqHeavy"
+    client "LMStudio"
     prompt #"
         {{ _.role("system") }}
         You analyze a user's message to detect and answer questions.
