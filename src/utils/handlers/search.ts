@@ -1,18 +1,18 @@
-import type { Peer, Session } from "@honcho-ai/sdk";
 import type { AppSession } from "@mentra/sdk";
 import { ViewType } from "@mentra/sdk";
 import { b } from "../baml_client";
 import { showTextDuringOperation } from "../core/textWall";
 import { performWebSearch } from "../tools/webSearch";
+import type { MemoryPeer, MemorySession } from "../tools/memoryCall";
 import { MemoryCapture } from "./memory";
 
 const webSearchRunIds = new WeakMap<AppSession, number>();
 
 export async function startWebSearchFlow(
-	query: string,
-	session: AppSession,
-	memorySession: Session,
-	peers: Peer[],
+        query: string,
+        session: AppSession,
+        memorySession: MemorySession,
+        peers: MemoryPeer[],
 ) {
 	const runId = Date.now();
 	webSearchRunIds.set(session, runId);

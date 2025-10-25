@@ -6,7 +6,6 @@
 	"devDependencies": {
 		"@biomejs/biome": "2.1.2",
 		"@types/bun": "latest",
-		"@types/google.maps": "^3.58.1",
 		"@types/node": "^24.5.2",
 		"tsx": "^4.20.5"
 	},
@@ -21,11 +20,9 @@
 	},
 	"dependencies": {
 		"@boundaryml/baml": "^0.208.2",
-		"@honcho-ai/sdk": "^1.4.0",
-		"@mentra/sdk": "^2.1.23",
-		"@t3-oss/env-core": "^0.13.8",
-		"@tavily/core": "^0.5.12",
-		"dotenv": "^17.2.2",
+                "@mentra/sdk": "^2.1.23",
+                "@t3-oss/env-core": "^0.13.8",
+                "dotenv": "^17.2.2",
 		"exa-js": "^1.9.3",
 		"openai": "^5.23.0"
 	}

@@ -1,15 +1,15 @@
-import type { Peer, Session } from "@honcho-ai/sdk";
 import { type AppSession, ViewType } from "@mentra/sdk";
 import { b } from "../baml_client";
 import { showTextDuringOperation } from "../core/textWall";
+import type { MemoryPeer, MemorySession } from "../tools/memoryCall";
 
 const memoryRunCallIds = new WeakMap<AppSession, number>();
 
 export async function MemoryCapture(
-	textArtifact: string,
-	session: AppSession,
-	memorySession: Session,
-	peers: Peer[],
+        textArtifact: string,
+        session: AppSession,
+        memorySession: MemorySession,
+        peers: MemoryPeer[],
 ) {
 	const runId = Date.now();
 	memoryRunCallIds.set(session, runId);
@@ -38,10 +38,10 @@ export async function MemoryCapture(
 }
 
 export async function MemoryRecall(
-	textQuery: string,
-	session: AppSession,
-	memorySession: Session,
-	peers: Peer[],
+        textQuery: string,
+        session: AppSession,
+        memorySession: MemorySession,
+        peers: MemoryPeer[],
 ) {
 	const runId = Date.now();
 	memoryRunCallIds.set(session, runId);
@@ -63,13 +63,13 @@ export async function MemoryRecall(
 				},
 			]);
 
-			const response = await showTextDuringOperation(
-				session,
-				"// Clairvoyant\nR: Trying to remember...",
-				"// Clairvoyant\nR: Got it!",
-				"// Clairvoyant\nR: Couldn't remember!",
-				() => diatribePeer.chat(textQuery),
-			);
+                        const response = await showTextDuringOperation(
+                                session,
+                                "// Clairvoyant\nR: Trying to remember...",
+                                "// Clairvoyant\nR: Got it!",
+                                "// Clairvoyant\nR: Couldn't remember!",
+                                () => diatribePeer.chat(textQuery),
+                        );
 			if (response) {
 				if (memoryRunCallIds.get(session) !== runId) {
 					session.logger.info(
