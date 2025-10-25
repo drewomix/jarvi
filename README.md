@@ -4,17 +4,17 @@ A real-time voice transcription and intelligent context-aware assistant built wi
 
 ## Overview
 
-Clairvoyant is an advanced MentraOS application that provides real-time voice transcription with intelligent routing to specialized AI capabilities. It listens for voice activity, transcribes speech using Groq's Whisper, routes queries to appropriate tools (weather, search, maps, memory, etc.), and provides concise, contextual responses through AI-powered formatting and persistent memory integration.
+Clairvoyant is an advanced MentraOS application that provides real-time voice transcription with intelligent routing to specialized AI capabilities. It listens for voice activity, transcribes speech using a local Whisper-compatible engine, routes queries to purpose-built offline tools (weather, search, maps, memory, etc.), and provides concise, contextual responses through AI-powered formatting and in-session memory integration.
 
 ## Architecture
 
 The application integrates six main layers:
 - **MentraOS Framework**: Provides audio streaming, voice activity detection, and UI components
 - **Intelligent Routing**: BAML-powered routing system that directs queries to appropriate handlers
-- **Specialized Tools**: External API integrations (weather, search, maps, memory)
+- **Specialized Tools**: Offline data synthesizers (weather, search, maps, memory)
 - **Handler Orchestration**: UX flow management with loading states and response formatting
 - **AI Formatting**: BAML prompts that convert tool outputs to concise, readable responses
-- **Persistent Memory**: Honcho-powered context and personalization system
+- **In-Session Memory**: Lightweight local store for context and personalization
 
 ## System Flow
 
@@ -27,27 +27,27 @@ sequenceDiagram
     participant Handler
     participant Tool
     participant BAML
-    participant Memory
-    participant ExtAPI as External APIs
+    participant Memory as Local Memory
+    participant Data as Offline Data
 
     User->>MentraOS: Starts speaking
     MentraOS->>Clairvoyant: onVoiceActivity + onAudioChunk
-    
-    User->>MentraOS: Stops speaking  
+
+    User->>MentraOS: Stops speaking
     MentraOS->>Clairvoyant: onVoiceActivity(false)
-    
-    Clairvoyant->>Clairvoyant: Process audio & transcribe via Groq Whisper
+
+    Clairvoyant->>Clairvoyant: Process audio & transcribe via local Whisper
     Clairvoyant->>Router: Route transcription via BAML
     Router-->>Clairvoyant: Routing decision (WEATHER/SEARCH/MAPS/MEMORY_RECALL/etc)
-    
+
     alt Specialized Route (e.g., WEATHER)
         Clairvoyant->>Handler: startWeatherFlow()
         Handler->>MentraOS: Show loading state
         Handler->>MentraOS: Subscribe to location
         MentraOS-->>Handler: Location data
         Handler->>Tool: getWeatherData(lat, lon)
-        Tool->>ExtAPI: OpenWeatherMap API
-        ExtAPI-->>Tool: Weather data
+        Tool->>Data: Generate synthetic forecast
+        Data-->>Tool: Weather snapshot
         Tool-->>Handler: Formatted weather response
         Handler->>BAML: SummarizeWeatherFormatted()
         BAML-->>Handler: Short readable lines
@@ -55,12 +55,12 @@ sequenceDiagram
         Handler->>Memory: Store interaction context
     else Memory Recall Route
         Clairvoyant->>Memory: MemoryRecall(query)
-        Memory->>Memory: Query Honcho peer
+        Memory->>Memory: Search local transcripts
         Memory->>BAML: Format retrieved context
         Memory->>MentraOS: Display personalized response
     else Default Route
         Clairvoyant->>Memory: MemoryCapture(transcription)
-        Memory->>Memory: Store in Honcho session
+        Memory->>Memory: Append to in-session history
     end
 ```
 
@@ -72,10 +72,10 @@ sequenceDiagram
 - **Extensible routing**: Easy to add new categories and handlers
 
 ### 🔧 Modular Tool Architecture
-- **Weather Tool**: OpenWeatherMap integration with location services
-- **Web Search Tool**: Tavily-powered real-time web search
-- **Maps Tool**: Google Places API for location queries
-- **Memory Tool**: Honcho-powered persistent context and personalization
+- **Weather Tool**: Generates deterministic forecasts based on location and seasonality
+- **Web Search Tool**: Queries a curated local knowledge base for timely snippets
+- **Maps Tool**: Scores nearby places using an embedded dataset and distance weighting
+- **Memory Tool**: Persists interactions in a lightweight, in-session datastore
 - **Knowledge Tool**: General knowledge questions via AI
 
 ### 🎯 Handler-Based Flow Management
@@ -91,8 +91,8 @@ sequenceDiagram
 - **Contextual formatting**: Responses tailored to user's query and personality
 
 ### 💾 Persistent Memory & Context
-- **Honcho integration**: Persistent memory across sessions
-- **Peer-based conversations**: Dedicated "diatribe" peer for raw transcription storage
+- **Local storage**: Keeps recent interactions in memory for the session duration
+- **Peer-inspired API**: Maintains the same capture/recall ergonomics without external services
 - **Personal context**: Remembers user preferences, history, and personal information
 - **Memory-aware responses**: Leverages stored context for personalized interactions
 
@@ -115,11 +115,11 @@ src/
     │   ├── env.ts              # Environment variable validation
     │   ├── textWall.ts         # UI text display helpers
     │   └── rateLimiting.ts     # API rate limiting utilities
-    ├── tools/                  # External API integrations
-    │   ├── weatherCall.ts      # OpenWeatherMap integration
-    │   ├── webSearch.ts        # Tavily web search integration
-    │   ├── mapsCall.ts         # Google Places integration
-    │   └── memoryCall.ts       # Honcho memory initialization
+    ├── tools/                  # Offline data synthesizers
+    │   ├── weatherCall.ts      # Deterministic weather generator
+    │   ├── webSearch.ts        # Local knowledge base search
+    │   ├── mapsCall.ts         # Embedded place ranking engine
+    │   └── memoryCall.ts       # Local session memory store
     ├── handlers/               # Flow orchestrators
     │   ├── weather.ts          # Weather query handler
     │   ├── search.ts           # Web search handler
@@ -148,8 +148,8 @@ baml_src/
 ### Prerequisites
 - [Bun](https://bun.sh) runtime
 - [ngrok](https://ngrok.com) for tunneling
-- API keys for: MentraOS, OpenWeatherMap, Tavily, Google Maps, Honcho
-- Local [LM Studio](https://lmstudio.ai/) server exposing an OpenAI-compatible API
+- MentraOS package and API key
+- Optional: Local [LM Studio](https://lmstudio.ai/) server exposing an OpenAI-compatible API
 
 ### Installation
 
@@ -162,10 +162,6 @@ bun install
 ```env
 PACKAGE_NAME=your-package-name
 MENTRAOS_API_KEY=your-mentraos-api-key
-OPENWEATHERMAP_API_KEY=your-weather-api-key
-TAVILY_API_KEY=your-tavily-api-key
-GOOGLE_MAPS_API_KEY=your-google-maps-api-key
-HONCHO_API_KEY=your-honcho-api-key
 LM_STUDIO_BASE_URL=http://127.0.0.7:1234/v1
 LM_STUDIO_API_KEY=lm-studio
 PORT=3000
@@ -213,17 +209,17 @@ enum Router {
 
 ## Memory & Context System
 
-### Persistent Memory with Honcho
-- **Session Management**: Unique sessions per user interaction
-- **Peer-based Storage**: Dedicated "diatribe" peer stores all transcriptions
-- **Context Retrieval**: Intelligent context recall for personalized responses
-- **Memory Integration**: Automatic context storage for all interactions
+### Lightweight Local Memory
+- **Session Management**: Unique in-memory session per user interaction
+- **Message Log**: Stores raw transcriptions for later recall
+- **Context Retrieval**: Scores transcripts for relevance using simple heuristics
+- **Memory Integration**: Automatically records each interaction with minimal overhead
 
 ### Memory Flow
-1. **Capture**: All transcriptions stored in Honcho session
-2. **Recall**: Personal queries trigger memory retrieval
+1. **Capture**: All transcriptions stored in the local session log
+2. **Recall**: Personal queries trigger lightweight similarity matching
 3. **Context**: Retrieved context formatted via BAML for natural responses
-4. **Persistence**: Memory persists across application sessions
+4. **Lifecycle**: Memory resets when the app restarts, keeping data on-device
 
 ## Tool Integration Pattern
 
@@ -271,14 +267,14 @@ npx baml-cli generate
 ## Technical Implementation Details
 
 ### Audio Processing
-- **PCM to WAV conversion**: Handles audio format conversion for Groq API
+- **PCM to WAV conversion**: Handles audio format conversion for Whisper-compatible engines
 - **Voice Activity Detection**: MentraOS built-in VAD for start/stop triggers
 - **Buffer management**: Efficient audio chunk concatenation
 - **Temporary file handling**: Safe creation and cleanup of audio files
 
 ### AI Integration
-- **Groq Whisper**: High-quality speech-to-text transcription
-- **Multiple AI clients**: OpenAI GPT-4o, Groq models via BAML configuration
+- **Local Whisper support**: Works with LM Studio or any OpenAI-compatible endpoint
+- **Multiple AI clients**: OpenAI GPT-4o and local models via BAML configuration
 - **Structured responses**: JSON mode for reliable AI output parsing
 - **Token optimization**: Minimal data transfer with maximum information density
 
@@ -292,12 +288,10 @@ npx baml-cli generate
 
 ### Core Framework
 - `@mentra/sdk`: MentraOS application framework
-- `@honcho-ai/sdk`: Persistent memory and context management
 
 ### AI & Processing
-- `groq-sdk`: Groq API client for Whisper transcription
 - `openai`: OpenAI API client for intelligent processing
-- `baml`: AI prompt engineering and routing framework
+- `@boundaryml/baml`: AI prompt engineering and routing framework
 
 ### External APIs
 - `wavefile`: Audio format conversion utilities
