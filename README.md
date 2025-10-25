@@ -148,7 +148,8 @@ baml_src/
 ### Prerequisites
 - [Bun](https://bun.sh) runtime
 - [ngrok](https://ngrok.com) for tunneling
-- API keys for: MentraOS, Groq, OpenAI, OpenWeatherMap, Tavily, Google Maps, Honcho
+- API keys for: MentraOS, OpenWeatherMap, Tavily, Google Maps, Honcho
+- Local [LM Studio](https://lmstudio.ai/) server exposing an OpenAI-compatible API
 
 ### Installation
 
@@ -161,12 +162,12 @@ bun install
 ```env
 PACKAGE_NAME=your-package-name
 MENTRAOS_API_KEY=your-mentraos-api-key
-GROQ_API_KEY=your-groq-api-key
-OPENAI_API_KEY=your-openai-api-key
 OPENWEATHERMAP_API_KEY=your-weather-api-key
 TAVILY_API_KEY=your-tavily-api-key
 GOOGLE_MAPS_API_KEY=your-google-maps-api-key
 HONCHO_API_KEY=your-honcho-api-key
+LM_STUDIO_BASE_URL=http://127.0.0.7:1234/v1
+LM_STUDIO_API_KEY=lm-studio
 PORT=3000
 ```
 

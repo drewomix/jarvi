@@ -61,7 +61,7 @@ class WeatherLines {
 }
 
 function SummarizeWeatherFormatted(input: FormattedWeather) -> WeatherLines {
-  client "openai/gpt-4o-mini"
+  client "LMStudio"
 
   prompt #"
   You are a witty, conversational weather reporter that's super brief even if you have a lot of data to work with.

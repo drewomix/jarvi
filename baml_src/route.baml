@@ -12,7 +12,7 @@ class RoutingBehavior {
 }
 
 function Route(text: string) -> RoutingBehavior {
-    client "GroqHeavy"
+    client "LMStudio"
     prompt #"
         You are a routing assistant. Pick the best router for the user's request.
         {{ _.role("user") }} {{ text }}

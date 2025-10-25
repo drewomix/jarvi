@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import { env } from "../src/utils/core/env";
 
 const samplePayload = {
 	places: [
@@ -33,13 +32,15 @@ describe("Maps API Integration", () => {
 		process.env.PACKAGE_NAME ??= "test-package";
 		process.env.PORT ??= "3000";
 		process.env.MENTRAOS_API_KEY ??= "test-mentra-key";
-		process.env.GROQ_API_KEY ??= "test-groq-key";
-		process.env.OPENAI_API_KEY ??= "test-openai-key";
 		process.env.OPENWEATHERMAP_API_KEY ??= "test-weather-key";
 		process.env.TAVILY_API_KEY ??= "test-tavily-key";
+		process.env.HONCHO_API_KEY ??= "test-honcho-key";
+		process.env.LM_STUDIO_BASE_URL ??= "http://127.0.0.7:1234/v1";
+		process.env.LM_STUDIO_API_KEY ??= "lm-studio";
 
 		// Ensure env is initialized
-		env;
+		await import("../src/utils/core/env");
+
 		const originalFetch = globalThis.fetch;
 		globalThis.fetch = Object.assign(
 			async () =>
@@ -81,13 +82,14 @@ describe("Maps API Integration", () => {
 		process.env.PACKAGE_NAME ??= "test-package";
 		process.env.PORT ??= "3000";
 		process.env.MENTRAOS_API_KEY ??= "test-mentra-key";
-		process.env.GROQ_API_KEY ??= "test-groq-key";
-		process.env.OPENAI_API_KEY ??= "test-openai-key";
 		process.env.OPENWEATHERMAP_API_KEY ??= "test-weather-key";
 		process.env.TAVILY_API_KEY ??= "test-tavily-key";
+		process.env.HONCHO_API_KEY ??= "test-honcho-key";
+		process.env.LM_STUDIO_BASE_URL ??= "http://127.0.0.7:1234/v1";
+		process.env.LM_STUDIO_API_KEY ??= "lm-studio";
 
 		// Ensure env is initialized
-		env;
+		await import("../src/utils/core/env");
 		const originalFetch = globalThis.fetch;
 		globalThis.fetch = Object.assign(
 			async () =>

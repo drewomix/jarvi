@@ -1,74 +1,11 @@
 // Learn more about clients at https://docs.boundaryml.com/docs/snippets/clients/overview
 
-client<llm> CustomGPT4o {
-  provider openai
-  options {
-    model "gpt-4o"
-    api_key env.OPENAI_API_KEY
-  }
-}
-
-client<llm> Groq {
+client<llm> LMStudio {
   provider openai-generic
   options {
-    base_url "https://api.groq.com/openai/v1"
-    api_key env.GROQ_API_KEY
-    model "openai/gpt-oss-20b"
-  }
-}
-
-client<llm> GroqHeavy {
-  provider openai-generic
-  options {
-    base_url "https://api.groq.com/openai/v1"
-    api_key env.GROQ_API_KEY
-    model "openai/gpt-oss-120b"
-  }
-}
-
-
-client<llm> CustomGPT4oMini {
-  provider openai
-  retry_policy Exponential
-  options {
-    model "gpt-4o-mini"
-    api_key env.OPENAI_API_KEY
-  }
-}
-
-client<llm> CustomSonnet {
-  provider anthropic
-  options {
-    model "claude-3-5-sonnet-20241022"
-    api_key env.ANTHROPIC_API_KEY
-  }
-}
-
-
-client<llm> CustomHaiku {
-  provider anthropic
-  retry_policy Constant
-  options {
-    model "claude-3-haiku-20240307"
-    api_key env.ANTHROPIC_API_KEY
-  }
-}
-
-// https://docs.boundaryml.com/docs/snippets/clients/round-robin
-client<llm> CustomFast {
-  provider round-robin
-  options {
-    // This will alternate between the two clients
-    strategy [CustomGPT4oMini, CustomHaiku]
-  }
-}
-
-// https://docs.boundaryml.com/docs/snippets/clients/fallback
-client<llm> OpenaiFallback {
-  provider fallback
-  options {
-    // This will try the clients in order until one succeeds
-    strategy [CustomGPT4oMini, CustomGPT4oMini]
+    base_url env.LM_STUDIO_BASE_URL
+    api_key env.LM_STUDIO_API_KEY
+    model "qwen/qwen3-4b-2507"
   }
 }
 
